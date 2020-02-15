@@ -1,11 +1,12 @@
 import { Discord, On, Client } from "@typeit/discord";
-import { Guild, Message } from "discord.js";
+import { Guild, Message, GuildMember } from "discord.js";
 
 // * Utils
 import { CommandHandler } from "utils/commandHandler";
 
 // * Helpers
 import sendReglementMessage from "./helpers/sendReglementMessage";
+import sendJoinMessage from "./helpers/sendJoinMessage";
 
 // * Load environment variables
 import "lib/env";
@@ -43,5 +44,14 @@ export default class DiscordClient {
     if (DiscordClient.CLIENT.user.id !== message.author.id) {
       DiscordClient.COMMAND_HANDLER.checkAndRunCommand(message);
     }
+  }
+
+  @On("guildMemberAdd")
+  async onGuildMemberAdd(member: GuildMember) {
+    const server: Guild = DiscordClient.CLIENT.guilds.find(
+      guild => guild.id === SERVER_ID
+    );
+
+    sendJoinMessage(server, member);
   }
 }
