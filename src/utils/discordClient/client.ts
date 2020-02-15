@@ -7,6 +7,7 @@ import { CommandHandler } from "utils/commandHandler";
 // * Helpers
 import sendReglementMessage from "./helpers/sendReglementMessage";
 import sendJoinMessage from "./helpers/sendJoinMessage";
+import sendLeaveMessage from "./helpers/sendLeaveMessage";
 
 // * Load environment variables
 import "lib/env";
@@ -53,5 +54,14 @@ export default class DiscordClient {
     );
 
     sendJoinMessage(server, member);
+  }
+
+  @On("guildMemberRemove")
+  async onGuildMemberRemove(member: GuildMember) {
+    const server: Guild = DiscordClient.CLIENT.guilds.find(
+      guild => guild.id === SERVER_ID
+    );
+
+    sendLeaveMessage(server, member);
   }
 }
