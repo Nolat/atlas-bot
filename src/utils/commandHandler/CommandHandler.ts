@@ -16,18 +16,18 @@ const COMMAND_PREFIX: string = process.env.COMMAND_PREFIX!;
 export default class CommandHandler {
   commandsArray: CommandInArray[];
 
-  pathToCommands: string;
+  pathToCommandFolder: string;
 
   // * Constructor
   constructor(path: string) {
     this.commandsArray = [];
-    this.pathToCommands = fs.realpathSync(path);
+    this.pathToCommandFolder = fs.realpathSync(path);
   }
 
   // * Recursively import command
   init() {
     recursive(
-      this.pathToCommands,
+      this.pathToCommandFolder,
       async (err: NodeJS.ErrnoException | null, files: string[]) => {
         files.forEach(file => this.importCommandFromFile(file));
       }

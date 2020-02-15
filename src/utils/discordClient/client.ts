@@ -1,13 +1,18 @@
 import { Discord, On, Client } from "@typeit/discord";
-import { Message } from "discord.js";
+import { Guild, Message } from "discord.js";
 
 // * Utils
 import { CommandHandler } from "utils/commandHandler";
+
+// * Helpers
+import sendReglementMessage from "./helpers/sendReglementMessage";
 
 // * Load environment variables
 import "lib/env";
 
 const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN!;
+
+const SERVER_ID: string = process.env.SERVER_ID!;
 
 @Discord
 export default class DiscordClient {
@@ -22,6 +27,15 @@ export default class DiscordClient {
     this.CLIENT.login(DISCORD_TOKEN);
 
     this.COMMAND_HANDLER = commandHandler;
+  }
+
+  @On("ready")
+  async onReady() {
+    const server: Guild = DiscordClient.CLIENT.guilds.find(
+      guild => guild.id === SERVER_ID
+    );
+
+    sendReglementMessage(server);
   }
 
   @On("message")
