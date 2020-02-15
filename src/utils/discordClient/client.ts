@@ -10,6 +10,7 @@ import sendJoinMessage from "./helpers/sendJoinMessage";
 
 // * Load environment variables
 import "lib/env";
+import sendLeaveMessage from "./helpers/sendLeaveMessage";
 
 const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN!;
 
@@ -53,5 +54,14 @@ export default class DiscordClient {
     );
 
     sendJoinMessage(server, member);
+  }
+
+  @On("guildMemberRemove")
+  async onGuildMemberRemove(member: GuildMember) {
+    const server: Guild = DiscordClient.CLIENT.guilds.find(
+      guild => guild.id === SERVER_ID
+    );
+
+    sendLeaveMessage(server, member);
   }
 }
