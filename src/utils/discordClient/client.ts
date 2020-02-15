@@ -7,10 +7,10 @@ import { CommandHandler } from "utils/commandHandler";
 // * Helpers
 import sendReglementMessage from "./helpers/sendReglementMessage";
 import sendJoinMessage from "./helpers/sendJoinMessage";
+import sendLeaveMessage from "./helpers/sendLeaveMessage";
 
 // * Load environment variables
 import "lib/env";
-import sendLeaveMessage from "./helpers/sendLeaveMessage";
 
 const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN!;
 
