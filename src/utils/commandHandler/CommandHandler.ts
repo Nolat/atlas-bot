@@ -5,12 +5,10 @@ import recursive from "recursive-readdir";
 // * Types
 import { Command, CommandInArray } from "types";
 
-// * helpers
+// * Helpers
 import isObjectCommand from "./helpers/isObjectCommand";
 
-// * Load environment variables
-import "lib/env";
-
+// * Environment variables
 const COMMAND_PREFIX: string = process.env.COMMAND_PREFIX!;
 
 export default class CommandHandler {

@@ -1,5 +1,6 @@
 import { Guild, GuildMember, TextChannel } from "discord.js";
 
+// * Environment variables
 const JOIN_LEAVE_CHANNEL_ID: string = process.env.JOIN_LEAVE_CHANNEL_ID!;
 
 const sendJoinMessage = async (server: Guild, member: GuildMember) => {

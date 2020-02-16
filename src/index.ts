@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "cross-fetch/polyfill";
+import "lib/env";
 
 // * CommandHandler
 import { CommandHandler } from "utils/commandHandler";

@@ -1,8 +1,6 @@
 import { Guild, Message, RichEmbed, TextChannel } from "discord.js";
 
-// * Load environment variables
-import "lib/env";
-
+// * Environment variables
 const REGLEMENT_CHANNEL_ID: string = process.env.REGLEMENT_CHANNEL_ID!;
 const REGLEMENT_MESSAGE_ID: string = process.env.REGLEMENT_MESSAGE_ID!;
 
