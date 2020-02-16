@@ -5,6 +5,7 @@ import { Guild, Message, GuildMember } from "discord.js";
 import { CommandHandler } from "utils/commandHandler";
 
 // * Helpers
+import sendAccueilMessage from "./helpers/sendAccueilMessage";
 import sendReglementMessage from "./helpers/sendReglementMessage";
 import sendJoinMessage from "./helpers/sendJoinMessage";
 import sendLeaveMessage from "./helpers/sendLeaveMessage";
@@ -37,6 +38,7 @@ export default class DiscordClient {
       guild => guild.id === SERVER_ID
     );
 
+    sendAccueilMessage(server);
     sendReglementMessage(server);
   }
 

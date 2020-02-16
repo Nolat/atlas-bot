@@ -5,7 +5,7 @@ import "cross-fetch/polyfill";
 import { CommandHandler } from "utils/commandHandler";
 
 // * Discord client
-import client from "utils/discordClient/client";
+import { client } from "utils/discordClient";
 
 const initApp = () => {
   // * Create new command handler
