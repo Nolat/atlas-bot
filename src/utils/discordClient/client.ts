@@ -5,16 +5,17 @@ import { Guild, Message, GuildMember } from "discord.js";
 import { CommandHandler } from "utils/commandHandler";
 
 // * Helpers
+import {
+  awaitReactionAsNewMember,
+  awaitReactionForNewMember
+} from "./helpers/awaitReactionForNewMember";
 import sendAccueilMessage from "./helpers/sendAccueilMessage";
 import sendReglementMessage from "./helpers/sendReglementMessage";
 import sendJoinMessage from "./helpers/sendJoinMessage";
 import sendLeaveMessage from "./helpers/sendLeaveMessage";
 
-// * Load environment variables
-import "lib/env";
-
+// * Environment variables
 const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN!;
-
 const SERVER_ID: string = process.env.SERVER_ID!;
 
 @Discord
@@ -40,6 +41,7 @@ export default class DiscordClient {
 
     sendAccueilMessage(server);
     sendReglementMessage(server);
+    awaitReactionForNewMember(server);
   }
 
   @On("message")
@@ -56,6 +58,7 @@ export default class DiscordClient {
     );
 
     sendJoinMessage(server, member);
+    awaitReactionAsNewMember(server, member);
   }
 
   @On("guildMemberRemove")

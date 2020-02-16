@@ -1,8 +1,6 @@
-import { Guild, Message, RichEmbed, TextChannel } from "discord.js";
+import { Guild, Message, RichEmbed, TextChannel, Emoji } from "discord.js";
 
-// * Load environment variables
-import "lib/env";
-
+// * Environment variables
 const ACCUEIL_CHANNEL_ID: string = process.env.ACCUEIL_CHANNEL_ID!;
 const ACCUEIL_MESSAGE_ID: string = process.env.ACCUEIL_MESSAGE_ID!;
 
@@ -11,7 +9,7 @@ const sendAccueilMessage = async (server: Guild) => {
 
   embed
     .setColor("#f9ca24")
-    .setTitle(":tada: Bienvenue")
+    .setTitle("👋 Bienvenue")
     .setDescription(
       "Bienvenue cher joueur/joueuse sur Edell, un monde virtuel occupé par 3 factions en guerre, " +
         "défendant chacun leurs idéaux. (Plus d’informations dans #factions)." +
@@ -21,21 +19,30 @@ const sendAccueilMessage = async (server: Guild) => {
         "\n\nSoit guidé(e) par Atlas, une IA créée pour vous guider dans ce monde, et rejoins ta faction " +
         "pour prendre part au conflit sur Edell." +
         "\n\n\n⚠️ Le monde d'Edell n'étant pas encore achevé, beaucoup de ses possibilités ne sont pas " +
-        "encore accessibles."
+        "encore accessibles." +
+        "\n\n\n\n➡️ *Pour continuer, merci de cliquer sur la réaction ci-dessous.*"
     );
 
   const accueilChannel: TextChannel = server.channels.find(
     channel => channel.id === ACCUEIL_CHANNEL_ID && channel.type === "text"
   ) as TextChannel;
 
+  let message: Message;
   try {
     const accueilMessage: Message = await accueilChannel.fetchMessage(
       ACCUEIL_MESSAGE_ID
     );
 
-    accueilMessage.edit({ embed });
+    message = await accueilMessage.edit({ embed });
   } catch (error) {
-    accueilChannel.send({ embed });
+    // ! We force it as we're sending only one message
+    message = (await accueilChannel.send({ embed })) as Message;
+  }
+
+  const yesEmoji: Emoji = server.emojis.find(emoji => emoji.name === "yes");
+
+  if (yesEmoji) {
+    message.react(yesEmoji);
   }
 };
 
