@@ -7,14 +7,6 @@ const REGLEMENT_CHANNEL_ID: string = process.env.REGLEMENT_CHANNEL_ID!;
 const REGLEMENT_MESSAGE_ID: string = process.env.REGLEMENT_MESSAGE_ID!;
 
 const sendReglementMessage = async (server: Guild) => {
-  const reglementChannel: TextChannel = server.channels.find(
-    channel => channel.id === REGLEMENT_CHANNEL_ID && channel.type === "text"
-  ) as TextChannel;
-
-  const reglementMessage: Message = await reglementChannel.fetchMessage(
-    REGLEMENT_MESSAGE_ID
-  );
-
   const embed = new RichEmbed();
 
   embed
@@ -53,7 +45,19 @@ const sendReglementMessage = async (server: Guild) => {
       "Ni un **bonjour**, ni un **au revoir**, n'ont jamais tué personne. Nous vous demandons donc de faire preuve d'un minimum de politesse."
     );
 
-  reglementMessage.edit({ embed });
+  const reglementChannel: TextChannel = server.channels.find(
+    channel => channel.id === REGLEMENT_CHANNEL_ID && channel.type === "text"
+  ) as TextChannel;
+
+  try {
+    const reglementMessage: Message = await reglementChannel.fetchMessage(
+      REGLEMENT_MESSAGE_ID
+    );
+
+    reglementMessage.edit({ embed });
+  } catch (error) {
+    reglementChannel.send({ embed });
+  }
 };
 
 export default sendReglementMessage;
