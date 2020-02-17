@@ -1,0 +1,12 @@
+overwrite: true
+schema: "https://edell-api-dev.herokuapp.com/graphql"
+documents: "src/graphql/**/*.ts"
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+    - eslint --fix
