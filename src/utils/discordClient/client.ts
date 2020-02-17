@@ -22,7 +22,7 @@ const SERVER_ID: string = process.env.SERVER_ID!;
 export default class DiscordClient {
   private static CLIENT: Client;
 
-  private static COMMAND_HANDLER: CommandHandler;
+  public static COMMAND_HANDLER: CommandHandler;
 
   static start(commandHandler: CommandHandler) {
     this.CLIENT = new Client();
