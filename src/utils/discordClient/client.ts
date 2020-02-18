@@ -39,9 +39,9 @@ export default class DiscordClient {
       guild => guild.id === SERVER_ID
     );
 
-    sendAccueilMessage(server);
+    /* sendAccueilMessage(server);
     sendReglementMessage(server);
-    awaitReactionForNewMember(server);
+    awaitReactionForNewMember(server);*/
   }
 
   @On("message")

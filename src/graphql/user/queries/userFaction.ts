@@ -5,6 +5,7 @@ export default gql`
     user(id: $userId) {
       faction {
         id
+        name
       }
       joinedFactionAt
     }
