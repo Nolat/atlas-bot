@@ -13,6 +13,7 @@ import sendAccueilMessage from "./helpers/sendAccueilMessage";
 import sendReglementMessage from "./helpers/sendReglementMessage";
 import sendJoinMessage from "./helpers/sendJoinMessage";
 import sendLeaveMessage from "./helpers/sendLeaveMessage";
+import sendFactionsMessage from "./helpers/sendFactionsMessage";
 
 // * Environment variables
 const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN!;
@@ -41,6 +42,7 @@ export default class DiscordClient {
 
     sendAccueilMessage(server);
     sendReglementMessage(server);
+    sendFactionsMessage(server);
     awaitReactionForNewMember(server);
   }
 
