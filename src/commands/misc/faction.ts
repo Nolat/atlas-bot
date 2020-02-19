@@ -14,7 +14,7 @@ const FactionCommand: Command = {
   aliases: ["fd"],
   usage: "",
   description: "Rafraichi la description des factions",
-  onlyStaff: false,
+  onlyStaff: true,
   run: (message: Message) => runFaction(message)
 };
 
