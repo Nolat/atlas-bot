@@ -29,8 +29,6 @@ const sendFactionsMessage = async (server: Guild) => {
     fetchPolicy: "no-cache"
   });
 
-  console.log(data);
-
   data.factions.forEach(async (faction, index) => {
     // Faction Informations
     const {
