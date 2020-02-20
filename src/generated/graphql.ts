@@ -26,11 +26,12 @@ export type Mutation = {
   __typename?: "Mutation";
   setUserFaction: User;
   unsetUserFaction: User;
-  createFaction: Faction;
+  addFaction: Faction;
+  removeFaction: Scalars["Boolean"];
 };
 
 export type MutationSetUserFactionArgs = {
-  nameFaction: Scalars["String"];
+  factionName: Scalars["String"];
   id: Scalars["String"];
 };
 
@@ -38,10 +39,14 @@ export type MutationUnsetUserFactionArgs = {
   id: Scalars["String"];
 };
 
-export type MutationCreateFactionArgs = {
+export type MutationAddFactionArgs = {
   icon: Scalars["String"];
   color: Scalars["String"];
   description: Scalars["String"];
+  name: Scalars["String"];
+};
+
+export type MutationRemoveFactionArgs = {
   name: Scalars["String"];
 };
 
@@ -61,6 +66,16 @@ export type QueryFactionArgs = {
   name: Scalars["String"];
 };
 
+export type ServerMessage = {
+  __typename?: "ServerMessage";
+  id: Scalars["String"];
+  idChannel: Scalars["String"];
+  idMessage: Scalars["String"];
+  type: Scalars["String"];
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
+};
+
 export type User = {
   __typename?: "User";
   id: Scalars["String"];
@@ -69,6 +84,32 @@ export type User = {
   joinedFactionAt?: Maybe<Scalars["String"]>;
   createdAt: Scalars["String"];
   updatedAt: Scalars["String"];
+};
+
+export type RemoveFactionMutationVariables = {
+  name: Scalars["String"];
+};
+
+export type RemoveFactionMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "removeFaction"
+>;
+
+export type FactionQueryVariables = {
+  name: Scalars["String"];
+};
+
+export type FactionQuery = { __typename?: "Query" } & {
+  faction: { __typename?: "Faction" } & Pick<
+    Faction,
+    | "name"
+    | "description"
+    | "color"
+    | "icon"
+    | "memberCount"
+    | "maxMember"
+    | "isJoinable"
+  >;
 };
 
 export type FactionsQueryVariables = {};
