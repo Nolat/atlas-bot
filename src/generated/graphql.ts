@@ -86,6 +86,17 @@ export type User = {
   updatedAt: Scalars["String"];
 };
 
+export type AddFactionMutationVariables = {
+  name: Scalars["String"];
+  description: Scalars["String"];
+  icon: Scalars["String"];
+  color: Scalars["String"];
+};
+
+export type AddFactionMutation = { __typename?: "Mutation" } & {
+  addFaction: { __typename?: "Faction" } & Pick<Faction, "id">;
+};
+
 export type RemoveFactionMutationVariables = {
   name: Scalars["String"];
 };

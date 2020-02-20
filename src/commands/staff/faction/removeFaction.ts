@@ -3,13 +3,9 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import faction from "graphql/faction/queries/faction";
-
 import removeFaction from "graphql/faction/mutations/removeFaction";
 
 import {
-  FactionQuery,
-  FactionQueryVariables,
   RemoveFactionMutation,
   RemoveFactionMutationVariables
 } from "generated/graphql";
@@ -53,7 +49,7 @@ const runRemoveFaction = async (message: Message) => {
 
   if (data?.removeFaction) {
     embed
-      .setTitle(":tada: Félicitations !")
+      .setTitle("🎉 Félicitations !")
       .setColor("GREEN")
       .setDescription(`La faction ${name} a bien été suprimée.`);
   }
