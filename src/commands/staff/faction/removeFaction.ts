@@ -24,7 +24,7 @@ const RemoveFactionCommand: Command = {
   name: "removeFaction",
   aliases: ["rf", "rmFaction"],
   usage: "",
-  description: "Supprimes une faction",
+  description: "Supprime une faction",
   onlyStaff: true,
   run: (message: Message) => runRemoveFaction(message)
 };
@@ -67,7 +67,7 @@ const runRemoveFaction = async (message: Message) => {
           embed
             .setColor("RED")
             .setTitle(":rotating_light: Erreur innatendue !")
-            .setDescription(`Merci de contact le Staff.`);
+            .setDescription(`Merci de contacter le Staff.`);
           break;
       }
     });

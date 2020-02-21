@@ -25,9 +25,9 @@ const QUESTION_TITLE = ":pencil: Ajout d'une faction";
 const NAME_QUESTION = "Quel nom souhaitez-vous pour cette faction ?";
 const DESCRIPTION_QUESTION =
   "Veuillez écrire une description pour cette faction.";
-const ICON_QUESTION = "Quel icone souhaitez-vous pour cette faction ?";
+const ICON_QUESTION = "Quel icône souhaitez-vous pour cette faction ?";
 const COLOR_QUESTION =
-  "Quelle icone souhaitez-vous pour cette faction ? (en format hex :#ff7675)";
+  "Quelle couleur souhaitez-vous pour cette faction ? (en format hex :#ff7675)";
 
 const AddFactionCommand: Command = {
   name: "addFaction",
@@ -88,7 +88,7 @@ const runAddFactio = async (message: Message) => {
             embed
               .setColor("RED")
               .setTitle(":rotating_light: Erreur innatendue !")
-              .setDescription(`Merci de contact le Staff.`);
+              .setDescription(`Merci de contacter le Staff.`);
             break;
         }
       });
