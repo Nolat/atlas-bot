@@ -24,7 +24,10 @@ export default class DiscordClient {
 
   @On("message")
   async onMessage(message: Message) {
-    if (DiscordClient.CLIENT.user.id !== message.author.id) {
+    if (
+      DiscordClient.CLIENT.user.id !== message.author.id &&
+      message.channel.type !== "dm"
+    ) {
       DiscordClient.COMMAND_HANDLER.checkAndRunCommand(message);
     }
   }
