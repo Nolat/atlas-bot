@@ -69,7 +69,7 @@ export default class CommandHandler {
   checkAndRunCommand = (message: Message) => {
     const command = this.getCommandFromMessage(message);
 
-    if (command && command.onlyStaff === isMemberStaff(message.member))
+    if (command && (!command.onlyStaff || isMemberStaff(message.member)))
       command.run(message);
   };
 
