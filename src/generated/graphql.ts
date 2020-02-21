@@ -66,9 +66,14 @@ export type QueryFactionArgs = {
   name: Scalars["String"];
 };
 
-export type Subscription = {
-  __typename?: "Subscription";
-  factionDescriptionUpdate: Array<Faction>;
+export type ServerMessage = {
+  __typename?: "ServerMessage";
+  id: Scalars["String"];
+  idChannel: Scalars["String"];
+  idMessage: Scalars["String"];
+  type: Scalars["String"];
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
 };
 
 export type User = {
@@ -128,7 +133,10 @@ export type UserFactionQueryVariables = {
 };
 
 export type UserFactionQuery = { __typename?: "Query" } & {
-  user: { __typename?: "User" } & Pick<User, "joinedFactionAt"> & {
+  user: { __typename?: "User" } & Pick<
+    User,
+    "id" | "username" | "joinedFactionAt"
+  > & {
       faction: Maybe<{ __typename?: "Faction" } & Pick<Faction, "id" | "name">>;
     };
 };

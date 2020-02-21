@@ -41,7 +41,7 @@ export default class DiscordClient {
 
     /* sendAccueilMessage(server);
     sendReglementMessage(server);
-    awaitReactionForNewMember(server);*/
+    awaitReactionForNewMember(server); */
   }
 
   @On("message")
