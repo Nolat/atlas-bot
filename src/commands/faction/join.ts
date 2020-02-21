@@ -12,9 +12,6 @@ import moment from "moment";
 // * Types
 import { Command } from "types";
 
-// * Constants
-import { NUMBER_DAY_BEFORE_SWITCH_FACTION } from "utils/globalVariables";
-
 // * GraphQL client
 import client from "graphql/client";
 
@@ -28,7 +25,6 @@ import {
   FactionsQueryVariables,
   UserFactionQuery,
   UserFactionQueryVariables,
-  Faction,
   SetUserFactionMutation,
   SetUserFactionMutationVariables,
   UnsetUserFactionMutation,
@@ -36,6 +32,9 @@ import {
 } from "generated/graphql";
 import setUserFaction from "graphql/user/mutation/setUserFaction";
 import unsetUserFaction from "graphql/user/mutation/unsetUserFaction";
+
+// * Constants
+const DAYS_LIMIT = 7;
 
 const JoinCommand: Command = {
   name: "join",
@@ -50,54 +49,60 @@ const JoinCommand: Command = {
 const runJoin = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
   const user: User = message.author;
-  const userId: string = user.id;
+  const { id } = user;
 
   const { data } = await client.query<
     UserFactionQuery,
     UserFactionQueryVariables
   >({
     query: userFaction,
-    variables: { userId },
+    variables: { id },
     fetchPolicy: "network-only"
   });
 
-  // With faction
+  // * With faction
   if (data?.user.faction) {
-    const daysSinceJoined =
-      moment().diff(moment(Number(data?.user.joinedFactionAt!)), "d") + 8;
+    const daysSinceJoined = moment().diff(data?.user.joinedFactionAt!, "d");
 
-    if (daysSinceJoined > 7) {
-      await buildText(embed, message.guild, data.user.faction.name);
-      await sendMessageAndGetReact(message, embed, data.user.faction.name);
-    } else {
+    if (daysSinceJoined > DAYS_LIMIT)
+      handleEmbed(message, embed, data.user.faction.name);
+    else {
       embed
         .setColor("RED")
         .setDescription(
-          `Tu as rejoins une faction il y a moins de ${NUMBER_DAY_BEFORE_SWITCH_FACTION} jours, tu dois encore attendre avant de changer!`
+          `Tu as rejoins une faction il y a moins de ${DAYS_LIMIT} jours, tu dois encore attendre avant de changer!`
         );
 
       await message.channel.send(embed);
     }
 
-    // Without faction
-  } else {
-    await buildText(embed, message.guild);
-    await sendMessageAndGetReact(message, embed);
-  }
+    // * Without faction
+  } else handleEmbed(message, embed);
 };
 
-const buildText = async (
+const handleEmbed = async (
+  message: Message,
   embed: RichEmbed,
-  guild: Guild,
-  currentFactionName: string | undefined = undefined
+  currentFactionName?: string
 ) => {
-  embed.setTitle(
-    "**Choisis ta faction que possède Edell parmis les suivantes :**"
-  );
   const { data } = await client.query<FactionsQuery, FactionsQueryVariables>({
     query: factions,
     fetchPolicy: "network-only"
   });
+
+  await buildEmbed(embed, message.guild, data, currentFactionName);
+  await sendMessageAndGetReact(message, embed, data, currentFactionName);
+};
+
+const buildEmbed = async (
+  embed: RichEmbed,
+  guild: Guild,
+  data: FactionsQuery,
+  currentFactionName?: string
+) => {
+  embed.setTitle(
+    "**Choisis ta faction que possède Edell parmis les suivantes :**"
+  );
 
   if (data?.factions) {
     data.factions.forEach(faction => {
@@ -121,77 +126,62 @@ const buildText = async (
 const sendMessageAndGetReact = async (
   message: Message,
   embed: RichEmbed,
-  currentFactionName: string | undefined = undefined
+  data: FactionsQuery,
+  currentFactionName?: string
 ) => {
-  const choiceFactionMessage: Message | Message[] = await message.channel.send(
-    embed
-  );
-  const { data } = await client.query<FactionsQuery, FactionsQueryVariables>({
-    query: factions,
-    fetchPolicy: "network-only"
-  });
   const emojiListName: string[] = [];
 
+  const choiceFactionMessage: Message = (await message.channel.send(
+    embed
+  )) as Message;
+
   data.factions.forEach(faction => {
-    if (!currentFactionName || currentFactionName !== faction.name)
-      emojiListName.push(faction.icon);
+    if (currentFactionName !== faction.name) emojiListName.push(faction.icon);
   });
 
-  if (choiceFactionMessage instanceof Message) {
-    emojiListName.forEach(name => choiceFactionMessage.react(name));
-    const filter = (reaction: MessageReaction, reactUser: User) => {
-      return (
-        emojiListName.includes(reaction.emoji.name) &&
-        reactUser.id === message.author.id
+  emojiListName.forEach(name => choiceFactionMessage.react(name));
+  const filter = (reaction: MessageReaction, reactUser: User) => {
+    return (
+      emojiListName.includes(reaction.emoji.name) &&
+      reactUser.id === message.author.id
+    );
+  };
+
+  choiceFactionMessage
+    .awaitReactions(filter, { max: 1 })
+    .then(async (collected: Collection<string, MessageReaction>) => {
+      const emoji = collected.first().emoji.name;
+
+      getResponseAndSetFaction(
+        message.author.id,
+        emoji,
+        data,
+        currentFactionName
       );
-    };
 
-    await choiceFactionMessage
-      .awaitReactions(filter, { max: 1 })
-      .then(async (collected: Collection<string, MessageReaction>) => {
-        await getResponseAndSetFaction(
-          message.author.id,
-          collected,
-          data.factions,
-          currentFactionName
-        );
-      });
-
-    await choiceFactionMessage.clearReactions();
-  }
+      choiceFactionMessage.clearReactions();
+    });
 };
 
 const getResponseAndSetFaction = async (
-  userId: string,
-  collected: Collection<string, MessageReaction>,
-  factionList: Array<
-    { __typename?: "Faction" } & Pick<
-      Faction,
-      | "id"
-      | "description"
-      | "name"
-      | "memberCount"
-      | "maxMember"
-      | "isJoinable"
-      | "icon"
-    >
-  >,
+  id: string,
+  emoji: string,
+  data: FactionsQuery,
   currentFactionName: string | undefined = undefined
 ) => {
-  const awnser = collected.find("count", 2).emoji.name;
-
-  const factionName: string = factionList.find(fac => fac.icon === awnser)!
-    .name;
+  const factionName: string = data.factions.find(
+    faction => faction.icon === emoji
+  )!.name;
 
   if (currentFactionName)
     await client.mutate<
       UnsetUserFactionMutation,
       UnsetUserFactionMutationVariables
-    >({ mutation: unsetUserFaction, variables: { id: userId } });
+    >({ mutation: unsetUserFaction, variables: { id } });
 
   await client.mutate<SetUserFactionMutation, SetUserFactionMutationVariables>({
     mutation: setUserFaction,
-    variables: { factionName, id: userId }
+    variables: { factionName, id }
   });
 };
 

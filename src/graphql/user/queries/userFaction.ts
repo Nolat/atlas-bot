@@ -1,8 +1,8 @@
 import { gql } from "apollo-boost";
 
 export default gql`
-  query userFaction($userId: String!) {
-    user(id: $userId) {
+  query userFaction($id: String!) {
+    user(id: $id) {
       id
       username
       faction {

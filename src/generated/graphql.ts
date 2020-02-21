@@ -129,7 +129,7 @@ export type UserQuery = { __typename?: "Query" } & {
 };
 
 export type UserFactionQueryVariables = {
-  userId: Scalars["String"];
+  id: Scalars["String"];
 };
 
 export type UserFactionQuery = { __typename?: "Query" } & {
