@@ -3,10 +3,11 @@ import { gql } from "apollo-boost";
 export default gql`
   query factions {
     factions {
+      id
       name
       description
-      color
       icon
+      color
       memberCount
       maxMember
       isJoinable

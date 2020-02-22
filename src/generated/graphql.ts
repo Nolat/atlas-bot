@@ -129,15 +129,33 @@ export type FactionsQuery = { __typename?: "Query" } & {
   factions: Array<
     { __typename?: "Faction" } & Pick<
       Faction,
+      | "id"
       | "name"
       | "description"
-      | "color"
       | "icon"
+      | "color"
       | "memberCount"
       | "maxMember"
       | "isJoinable"
     >
   >;
+};
+
+export type SetUserFactionMutationVariables = {
+  factionName: Scalars["String"];
+  id: Scalars["String"];
+};
+
+export type SetUserFactionMutation = { __typename?: "Mutation" } & {
+  setUserFaction: { __typename?: "User" } & Pick<User, "id">;
+};
+
+export type UnsetUserFactionMutationVariables = {
+  id: Scalars["String"];
+};
+
+export type UnsetUserFactionMutation = { __typename?: "Mutation" } & {
+  unsetUserFaction: { __typename?: "User" } & Pick<User, "id">;
 };
 
 export type UserQueryVariables = {
@@ -146,4 +164,17 @@ export type UserQueryVariables = {
 
 export type UserQuery = { __typename?: "Query" } & {
   user: { __typename?: "User" } & Pick<User, "id" | "username">;
+};
+
+export type UserFactionQueryVariables = {
+  id: Scalars["String"];
+};
+
+export type UserFactionQuery = { __typename?: "Query" } & {
+  user: { __typename?: "User" } & Pick<
+    User,
+    "id" | "username" | "joinedFactionAt"
+  > & {
+      faction: Maybe<{ __typename?: "Faction" } & Pick<Faction, "id" | "name">>;
+    };
 };
