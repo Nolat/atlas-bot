@@ -93,12 +93,13 @@ export type FactionsQuery = { __typename?: "Query" } & {
     { __typename?: "Faction" } & Pick<
       Faction,
       | "id"
-      | "description"
       | "name"
+      | "description"
+      | "icon"
+      | "color"
       | "memberCount"
       | "maxMember"
       | "isJoinable"
-      | "icon"
     >
   >;
 };

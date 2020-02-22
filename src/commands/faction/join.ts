@@ -28,7 +28,8 @@ import {
   SetUserFactionMutation,
   SetUserFactionMutationVariables,
   UnsetUserFactionMutation,
-  UnsetUserFactionMutationVariables
+  UnsetUserFactionMutationVariables,
+  Faction
 } from "generated/graphql";
 import setUserFaction from "graphql/user/mutation/setUserFaction";
 import unsetUserFaction from "graphql/user/mutation/unsetUserFaction";
@@ -62,15 +63,25 @@ const runJoin = async (message: Message) => {
 
   // * With faction
   if (data?.user.faction) {
-    const daysSinceJoined = moment().diff(data?.user.joinedFactionAt!, "d");
+    const joinedDate = moment(Number(data?.user.joinedFactionAt!)).subtract(
+      10,
+      "d"
+    );
+
+    const daysSinceJoined = moment().diff(joinedDate, "d");
+    const timeSinceJoined = joinedDate.locale("fr").fromNow();
+
+    const dateAble = joinedDate.add(7, "d");
+    const timeUntilAble = dateAble.locale("fr").toNow(true);
 
     if (daysSinceJoined > DAYS_LIMIT)
       handleEmbed(message, embed, data.user.faction.name);
     else {
       embed
+        .setTitle("🚨 Demande impossible")
         .setColor("RED")
         .setDescription(
-          `Tu as rejoins une faction il y a moins de ${DAYS_LIMIT} jours, tu dois encore attendre avant de changer!`
+          `Tu as rejoins une faction, ${timeSinceJoined}.\n Tu dois encore attendre ${timeUntilAble} avant de changer!`
         );
 
       await message.channel.send(embed);
@@ -100,26 +111,26 @@ const buildEmbed = async (
   data: FactionsQuery,
   currentFactionName?: string
 ) => {
-  embed.setTitle(
-    "**Choisis ta faction que possède Edell parmis les suivantes :**"
+  const channelFactions: Channel = guild.channels.find(
+    channel => channel.name === "factions"
   );
 
-  if (data?.factions) {
-    data.factions.forEach(faction => {
-      const channelFactions: Channel = guild.channels.find(
-        channel => channel.name === "factions"
-      );
+  embed.setTitle("🛡️ Choix de ta faction").setColor("GOLD");
 
+  if (data?.factions) {
+    data.factions.forEach(async faction => {
       if (faction.name !== currentFactionName) {
-        embed.addField(
-          `La faction **${faction.name} ${faction.icon}**`,
-          `Actuellement il y a ${faction.memberCount} membres sur les ${
-            faction.maxMember
-          } possible.\n
-                 Pour plus d'information ${channelFactions.toString()}`
+        await embed.addField(
+          `**${faction.icon}  ${faction.name}**`,
+          `${faction.memberCount}/${faction.maxMember} membres`
         );
       }
     });
+
+    embed.addField(
+      "Pour plus d'information",
+      `➡️ ${channelFactions.toString()}`
+    );
   } else throw new Error("No faction");
 };
 
@@ -139,39 +150,37 @@ const sendMessageAndGetReact = async (
     if (currentFactionName !== faction.name) emojiListName.push(faction.icon);
   });
 
-  emojiListName.forEach(name => choiceFactionMessage.react(name));
-  const filter = (reaction: MessageReaction, reactUser: User) => {
+  emojiListName.forEach(name => {
+    choiceFactionMessage.react(name);
+  });
+
+  const filter = (reaction: MessageReaction, user: User) => {
     return (
       emojiListName.includes(reaction.emoji.name) &&
-      reactUser.id === message.author.id
+      user.id === message.author.id
     );
   };
 
   choiceFactionMessage
     .awaitReactions(filter, { max: 1 })
-    .then(async (collected: Collection<string, MessageReaction>) => {
+    .then((collected: Collection<string, MessageReaction>) => {
       const emoji = collected.first().emoji.name;
 
-      getResponseAndSetFaction(
-        message.author.id,
-        emoji,
-        data,
-        currentFactionName
-      );
+      getResponseAndSetFaction(message, emoji, data, currentFactionName);
 
       choiceFactionMessage.clearReactions();
     });
 };
 
 const getResponseAndSetFaction = async (
-  id: string,
+  message: Message,
   emoji: string,
   data: FactionsQuery,
   currentFactionName: string | undefined = undefined
 ) => {
-  const factionName: string = data.factions.find(
-    faction => faction.icon === emoji
-  )!.name;
+  const { id } = message.author;
+
+  const faction = data.factions.find(f => f.icon === emoji)!;
 
   if (currentFactionName)
     await client.mutate<
@@ -179,10 +188,22 @@ const getResponseAndSetFaction = async (
       UnsetUserFactionMutationVariables
     >({ mutation: unsetUserFaction, variables: { id } });
 
-  await client.mutate<SetUserFactionMutation, SetUserFactionMutationVariables>({
+  const result = await client.mutate<
+    SetUserFactionMutation,
+    SetUserFactionMutationVariables
+  >({
     mutation: setUserFaction,
-    variables: { factionName, id }
+    variables: { factionName: faction.name, id }
   });
+
+  if (result.data) {
+    const embed = new RichEmbed()
+      .setColor(faction.color)
+      .setTitle(`${faction.icon} Félicitation !`)
+      .setDescription(`Vous êtes maintenant membre de ${faction.name}.`);
+
+    message.channel.send({ embed });
+  }
 };
 
 export default JoinCommand;

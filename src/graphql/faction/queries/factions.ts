@@ -4,12 +4,13 @@ export default gql`
   query factions {
     factions {
       id
-      description
       name
+      description
+      icon
+      color
       memberCount
       maxMember
       isJoinable
-      icon
     }
   }
 `;
