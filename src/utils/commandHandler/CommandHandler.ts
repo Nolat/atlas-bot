@@ -7,6 +7,7 @@ import { Command, CommandInArray } from "types";
 
 // * Helpers
 import isObjectCommand from "./helpers/isObjectCommand";
+import isMemberStaff from "./helpers/isMemberStaff";
 
 // * Environment variables
 const COMMAND_PREFIX: string = process.env.COMMAND_PREFIX!;
@@ -68,7 +69,8 @@ export default class CommandHandler {
   checkAndRunCommand = (message: Message) => {
     const command = this.getCommandFromMessage(message);
 
-    if (command) command.run(message);
+    if (command && (!command.onlyStaff || isMemberStaff(message.member)))
+      command.run(message);
   };
 
   // * Return a command for a passing Message
