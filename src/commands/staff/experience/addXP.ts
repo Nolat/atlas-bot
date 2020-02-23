@@ -5,7 +5,7 @@ import client from "graphql/client";
 
 import faction from "graphql/faction/queries/faction";
 
-import giveUserExperience from "graphql/faction/mutations/giveUserExperience";
+import giveUserExperience from "graphql/client/experience/mutations/giveUserExperience";
 
 import {
   FactionQuery,

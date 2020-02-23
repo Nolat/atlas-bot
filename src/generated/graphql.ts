@@ -133,6 +133,26 @@ export type User = {
   updatedAt: Scalars["String"];
 };
 
+export type GiveUserExperienceMutationVariables = {
+  factionName: Scalars["String"];
+  experience: Scalars["Float"];
+  id: Scalars["String"];
+};
+
+export type GiveUserExperienceMutation = { __typename?: "Mutation" } & {
+  giveUserExperience: { __typename?: "Experience" } & Pick<Experience, "id">;
+};
+
+export type RemoveUserExperienceMutationVariables = {
+  factionName: Scalars["String"];
+  experience: Scalars["Float"];
+  id: Scalars["String"];
+};
+
+export type RemoveUserExperienceMutation = { __typename?: "Mutation" } & {
+  removeUserExperience: { __typename?: "Experience" } & Pick<Experience, "id">;
+};
+
 export type AddFactionMutationVariables = {
   name: Scalars["String"];
   description: Scalars["String"];
@@ -144,16 +164,6 @@ export type AddFactionMutation = { __typename?: "Mutation" } & {
   addFaction: { __typename?: "Faction" } & Pick<Faction, "id">;
 };
 
-export type GiveUserExperienceMutationVariables = {
-  factionName: Scalars["String"];
-  experience: Scalars["Float"];
-  id: Scalars["String"];
-};
-
-export type GiveUserExperienceMutation = { __typename?: "Mutation" } & {
-  giveUserExperience: { __typename?: "Experience" } & Pick<Experience, "id">;
-};
-
 export type RemoveFactionMutationVariables = {
   name: Scalars["String"];
 };
@@ -162,16 +172,6 @@ export type RemoveFactionMutation = { __typename?: "Mutation" } & Pick<
   Mutation,
   "removeFaction"
 >;
-
-export type RemoveUserExperienceMutationVariables = {
-  factionName: Scalars["String"];
-  experience: Scalars["Float"];
-  id: Scalars["String"];
-};
-
-export type RemoveUserExperienceMutation = { __typename?: "Mutation" } & {
-  removeUserExperience: { __typename?: "Experience" } & Pick<Experience, "id">;
-};
 
 export type FactionQueryVariables = {
   name: Scalars["String"];
@@ -215,6 +215,15 @@ export type GiveUserMoneyMutationVariables = {
 
 export type GiveUserMoneyMutation = { __typename?: "Mutation" } & {
   giveUserMoney: { __typename?: "User" } & Pick<User, "id">;
+};
+
+export type RemoveUserMoneyMutationVariables = {
+  id: Scalars["String"];
+  money: Scalars["Float"];
+};
+
+export type RemoveUserMoneyMutation = { __typename?: "Mutation" } & {
+  removeUserMoney: { __typename?: "User" } & Pick<User, "id">;
 };
 
 export type SetUserFactionMutationVariables = {

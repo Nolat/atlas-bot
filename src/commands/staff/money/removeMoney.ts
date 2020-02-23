@@ -3,7 +3,7 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import giveUserMoney from "graphql/user/mutation/giveUserMoney";
+import removeUserMoney from "graphql/user/mutation/removeUserMoney";
 
 // * Helper
 import getMentionsFromResponse from "helpers/discord/getMentionsFromResponse";
@@ -13,25 +13,25 @@ import getParamFromResponse from "helpers/discord/getParamFromResponse";
 import { Command } from "types";
 
 import {
-  GiveUserMoneyMutation,
-  GiveUserMoneyMutationVariables
+  RemoveUserMoneyMutation,
+  RemoveUserMoneyMutationVariables
 } from "generated/graphql";
 
 //* Constants
-const QUESTION_TITLE = ":moneybag: Gain d'argent";
-const USER_QUESTION = "À quel(s) joueur(s) voulez-vous ajouter de l'argent ?";
-const HOW_QUESTION = "Combien d'argent voulez-vous ajouter ? (ex: 1po 3pa 1pc)";
+const QUESTION_TITLE = ":moneybag: Retrait d'argent";
+const USER_QUESTION = "À quel(s) joueur(s) voulez-vous retirer de l'argent ?";
+const HOW_QUESTION = "Combien d'argent voulez-vous retirer ? (ex: 1po 3pa 1pc)";
 
-const addMoneyCommand: Command = {
-  name: "addMoney",
-  aliases: ["am"],
+const removeMoneyCommand: Command = {
+  name: "removeMoney",
+  aliases: ["rm"],
   usage: "",
-  description: "Donne de l'argent à un ou plusieurs joueur(s)",
+  description: "Retire de l'argent à un ou plusieurs joueur(s)",
   onlyStaff: true,
-  run: (message: Message) => runAddMoney(message)
+  run: (message: Message) => runRemoveMoney(message)
 };
 
-const runAddMoney = async (message: Message) => {
+const runRemoveMoney = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
 
   const mentions = await getMentionsFromResponse(
@@ -56,19 +56,19 @@ const runAddMoney = async (message: Message) => {
     const { id } = user;
 
     const { data, errors } = await client.mutate<
-      GiveUserMoneyMutation,
-      GiveUserMoneyMutationVariables
+      RemoveUserMoneyMutation,
+      RemoveUserMoneyMutationVariables
     >({
-      mutation: giveUserMoney,
+      mutation: removeUserMoney,
       variables: { id, money },
       errorPolicy: "all"
     });
 
-    if (data?.giveUserMoney) {
+    if (data?.removeUserMoney) {
       embed
         .setTitle("🎉 Félicitations !")
         .setColor("GREEN")
-        .setDescription(`${user.toString()} a reçu ${getMoneyString(money)}.`);
+        .setDescription(`${user.toString()} a perdu ${getMoneyString(money)}.`);
     }
 
     if (errors) {
@@ -152,4 +152,4 @@ const getMoneyString = (money: number): string => {
   return text;
 };
 
-export default addMoneyCommand;
+export default removeMoneyCommand;

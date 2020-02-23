@@ -5,7 +5,7 @@ import client from "graphql/client";
 
 import faction from "graphql/faction/queries/faction";
 
-import removeUserExperience from "graphql/faction/mutations/removeUserExperience";
+import removeUserExperience from "graphql/client/experience/mutations/removeUserExperience";
 
 import {
   FactionQuery,
