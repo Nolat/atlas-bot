@@ -198,6 +198,15 @@ export type FactionsQuery = { __typename?: "Query" } & {
   >;
 };
 
+export type GiveUserMoneyMutationVariables = {
+  id: Scalars["String"];
+  money: Scalars["Float"];
+};
+
+export type GiveUserMoneyMutation = { __typename?: "Mutation" } & {
+  giveUserMoney: { __typename?: "User" } & Pick<User, "id">;
+};
+
 export type SetUserFactionMutationVariables = {
   factionName: Scalars["String"];
   id: Scalars["String"];
