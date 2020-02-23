@@ -35,10 +35,10 @@ const AddFactionCommand: Command = {
   usage: "",
   description: "Ajoute une faction",
   onlyStaff: true,
-  run: (message: Message) => runAddFactio(message)
+  run: (message: Message) => runAddFaction(message)
 };
 
-const runAddFactio = async (message: Message) => {
+const runAddFaction = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
 
   try {
