@@ -8,6 +8,14 @@ export type Scalars = {
   Float: number;
 };
 
+export type Experience = {
+  __typename?: "Experience";
+  id: Scalars["String"];
+  user: User;
+  faction: Faction;
+  value: Scalars["Float"];
+};
+
 export type Faction = {
   __typename?: "Faction";
   id: Scalars["String"];
@@ -24,18 +32,25 @@ export type Faction = {
 
 export type Mutation = {
   __typename?: "Mutation";
-  setUserFaction: User;
-  unsetUserFaction: User;
+  giveUserExperience: Experience;
+  removeUserExperience: Experience;
   addFaction: Faction;
   removeFaction: Scalars["Boolean"];
+  setUserFaction: User;
+  unsetUserFaction: User;
+  giveUserMoney: User;
+  removeUserMoney: User;
 };
 
-export type MutationSetUserFactionArgs = {
+export type MutationGiveUserExperienceArgs = {
   factionName: Scalars["String"];
+  experience: Scalars["Float"];
   id: Scalars["String"];
 };
 
-export type MutationUnsetUserFactionArgs = {
+export type MutationRemoveUserExperienceArgs = {
+  factionName: Scalars["String"];
+  experience: Scalars["Float"];
   id: Scalars["String"];
 };
 
@@ -50,20 +65,50 @@ export type MutationRemoveFactionArgs = {
   name: Scalars["String"];
 };
 
-export type Query = {
-  __typename?: "Query";
-  users: Array<User>;
-  user: User;
-  factions: Array<Faction>;
-  faction: Faction;
+export type MutationSetUserFactionArgs = {
+  factionName: Scalars["String"];
+  id: Scalars["String"];
 };
 
-export type QueryUserArgs = {
+export type MutationUnsetUserFactionArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationGiveUserMoneyArgs = {
+  money: Scalars["Float"];
+  id: Scalars["String"];
+};
+
+export type MutationRemoveUserMoneyArgs = {
+  money: Scalars["Float"];
+  id: Scalars["String"];
+};
+
+export type Query = {
+  __typename?: "Query";
+  experiences: Array<Experience>;
+  experience: Experience;
+  factions: Array<Faction>;
+  faction: Faction;
+  users: Array<User>;
+  user: User;
+};
+
+export type QueryExperiencesArgs = {
+  id?: Maybe<Scalars["String"]>;
+};
+
+export type QueryExperienceArgs = {
+  factionName: Scalars["String"];
   id: Scalars["String"];
 };
 
 export type QueryFactionArgs = {
   name: Scalars["String"];
+};
+
+export type QueryUserArgs = {
+  id: Scalars["String"];
 };
 
 export type ServerMessage = {
@@ -82,6 +127,8 @@ export type User = {
   username: Scalars["String"];
   faction?: Maybe<Faction>;
   joinedFactionAt?: Maybe<Scalars["String"]>;
+  money: Scalars["Float"];
+  experience?: Maybe<Scalars["Float"]>;
   createdAt: Scalars["String"];
   updatedAt: Scalars["String"];
 };
@@ -139,6 +186,15 @@ export type FactionsQuery = { __typename?: "Query" } & {
       | "isJoinable"
     >
   >;
+};
+
+export type GiveUserMoneyMutationVariables = {
+  id: Scalars["String"];
+  money: Scalars["Float"];
+};
+
+export type GiveUserMoneyMutation = { __typename?: "Mutation" } & {
+  giveUserMoney: { __typename?: "User" } & Pick<User, "id">;
 };
 
 export type SetUserFactionMutationVariables = {
