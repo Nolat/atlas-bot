@@ -163,6 +163,16 @@ export type RemoveFactionMutation = { __typename?: "Mutation" } & Pick<
   "removeFaction"
 >;
 
+export type RemoveUserExperienceMutationVariables = {
+  factionName: Scalars["String"];
+  experience: Scalars["Float"];
+  id: Scalars["String"];
+};
+
+export type RemoveUserExperienceMutation = { __typename?: "Mutation" } & {
+  removeUserExperience: { __typename?: "Experience" } & Pick<Experience, "id">;
+};
+
 export type FactionQueryVariables = {
   name: Scalars["String"];
 };
