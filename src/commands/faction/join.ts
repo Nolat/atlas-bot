@@ -114,7 +114,7 @@ const buildEmbed = async (
   embed.setTitle("🛡️ Choix de ta faction").setColor("GOLD");
 
   if (data?.factions) {
-    data.factions.forEach((faction: any) => {
+    data.factions.forEach(faction => {
       if (faction.name !== currentFactionName) {
         embed.addField(
           `**${faction.icon}  ${faction.name}**`,
@@ -142,8 +142,9 @@ const sendMessageAndGetReact = async (
     embed
   )) as Message;
 
-  data.factions.forEach((faction: any) => {
-    if (currentFactionName !== faction.name) emojiListName.push(faction.icon);
+  data.factions.forEach(faction => {
+    if (currentFactionName !== faction.name && faction.isJoinable)
+      emojiListName.push(faction.icon);
   });
 
   emojiListName.forEach(name => {
