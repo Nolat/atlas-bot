@@ -196,7 +196,11 @@ const getResponseAndSetFaction = async (
     const embed = new RichEmbed()
       .setColor(faction.color)
       .setTitle(`${faction.icon} Félicitation !`)
-      .setDescription(`Vous êtes maintenant membre de ${faction.name}.`);
+      .setDescription(
+        `${message.author.toString()} tu es maintenant membre de ${
+          faction.name
+        }.`
+      );
 
     message.channel.send({ embed });
   }
