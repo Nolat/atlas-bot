@@ -7,7 +7,6 @@ import giveUserMoney from "graphql/user/mutation/giveUserMoney";
 
 // * Helper
 import getMentionsFromResponse from "helpers/discord/getMentionsFromResponse";
-import getParamFromResponse from "helpers/discord/getParamFromResponse";
 
 // * Types
 import { Command } from "types";
@@ -16,6 +15,10 @@ import {
   GiveUserMoneyMutation,
   GiveUserMoneyMutationVariables
 } from "generated/graphql";
+
+// * Money helpers
+import askMoney from "./helpers/askMoney";
+import getMoneyString from "./helpers/getMoneyString";
 
 //* Constants
 const QUESTION_TITLE = ":moneybag: Gain d'argent";
@@ -50,7 +53,7 @@ const runAddMoney = async (message: Message) => {
     return;
   }
 
-  const money = await askMoney(message);
+  const money = await askMoney(message, QUESTION_TITLE, HOW_QUESTION);
 
   mentions.users.forEach(async user => {
     const { id } = user;
@@ -86,70 +89,6 @@ const runAddMoney = async (message: Message) => {
 
     message.channel.send(embed);
   });
-};
-
-const askMoney = async (message: Message): Promise<number> => {
-  const params = await getParamFromResponse(
-    message,
-    `${QUESTION_TITLE}`,
-    HOW_QUESTION,
-    60000
-  );
-  const values = params.split(" ");
-  let money = 0;
-
-  values.forEach(value => {
-    switch (value.replace(/[0-9]/g, "")) {
-      case "po":
-        money += Number(value.replace("po", "")) * 100;
-        break;
-
-      case "pa":
-        money += Number(value.replace("pa", "")) * 10;
-        break;
-
-      case "pc":
-        money += Number(value.replace("pc", ""));
-        break;
-
-      default:
-        money += Number(value);
-        break;
-    }
-  });
-
-  return money;
-};
-
-const getMoneyString = (money: number): string => {
-  const values = money.toString().split("");
-  let text = "";
-
-  const pc = Number(values.pop());
-  const pa = Number(values.pop());
-  const po = Number(values.join());
-
-  if (po > 0)
-    text =
-      po > 1
-        ? text.concat(`${po} pièces d'Or`)
-        : text.concat(`${po} pièce d'Or`);
-  if (po > 0 && pa > 0) text = text.concat(` & `);
-  if (pa > 0)
-    text =
-      pa > 1
-        ? text.concat(`${pa} pièces d'Argent`)
-        : text.concat(`${pa} pièce d'Argent`);
-  if (pa > 0 && pc > 0) text = text.concat(` & `);
-  if (pc > 0)
-    text =
-      pc > 1
-        ? text.concat(`${pc} pièces de Cuivre`)
-        : text.concat(`${pc} pièce de Cuivre`);
-
-  if (!po && !pa && !pc) text = "aucune pièce";
-
-  return text;
 };
 
 export default addMoneyCommand;

@@ -80,7 +80,7 @@ export type MutationGiveUserMoneyArgs = {
 };
 
 export type MutationRemoveUserMoneyArgs = {
-  money: Scalars["Float"];
+  amount: Scalars["Float"];
   id: Scalars["String"];
 };
 
@@ -219,7 +219,7 @@ export type GiveUserMoneyMutation = { __typename?: "Mutation" } & {
 
 export type RemoveUserMoneyMutationVariables = {
   id: Scalars["String"];
-  money: Scalars["Float"];
+  amount: Scalars["Float"];
 };
 
 export type RemoveUserMoneyMutation = { __typename?: "Mutation" } & {
@@ -261,5 +261,20 @@ export type UserFactionQuery = { __typename?: "Query" } & {
     "id" | "username" | "joinedFactionAt"
   > & {
       faction: Maybe<{ __typename?: "Faction" } & Pick<Faction, "id" | "name">>;
+    };
+};
+
+export type UserInfoQueryVariables = {
+  id: Scalars["String"];
+};
+
+export type UserInfoQuery = { __typename?: "Query" } & {
+  user: { __typename?: "User" } & Pick<
+    User,
+    "id" | "username" | "joinedFactionAt" | "money" | "experience"
+  > & {
+      faction: Maybe<
+        { __typename?: "Faction" } & Pick<Faction, "name" | "icon" | "color">
+      >;
     };
 };
