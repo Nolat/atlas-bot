@@ -23,7 +23,7 @@ import {
 import { Command } from "types";
 
 // * Helper
-import callIfConfirmed from "commands/user/helpers/askConfirmation";
+import askConfirmation from "helpers/discord/askConfirmation";
 import getMentionsFromResponse from "helpers/discord/getMentionsFromResponse";
 import getMoneyString from "./helpers/getMoneyString";
 import askMoney from "./helpers/askMoney";
@@ -95,7 +95,7 @@ const runPay = async (message: Message) => {
       `Êtes-vous sûr de vouloir payer ${getMoneyString(money)} ?`
     );
 
-  callIfConfirmed(
+  askConfirmation(
     message,
     embed,
     () => payToMentions(message, money, mentions),
