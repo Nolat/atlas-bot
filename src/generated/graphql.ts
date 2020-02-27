@@ -14,6 +14,7 @@ export type Experience = {
   user: User;
   faction: Faction;
   value: Scalars["Float"];
+  level: Scalars["Float"];
 };
 
 export type Faction = {
@@ -111,16 +112,6 @@ export type QueryUserArgs = {
   id: Scalars["String"];
 };
 
-export type ServerMessage = {
-  __typename?: "ServerMessage";
-  id: Scalars["String"];
-  idChannel: Scalars["String"];
-  idMessage: Scalars["String"];
-  type: Scalars["String"];
-  createdAt: Scalars["String"];
-  updatedAt: Scalars["String"];
-};
-
 export type User = {
   __typename?: "User";
   id: Scalars["String"];
@@ -129,6 +120,7 @@ export type User = {
   joinedFactionAt?: Maybe<Scalars["String"]>;
   money: Scalars["Float"];
   experience?: Maybe<Scalars["Float"]>;
+  level?: Maybe<Scalars["Float"]>;
   createdAt: Scalars["String"];
   updatedAt: Scalars["String"];
 };
@@ -271,7 +263,7 @@ export type UserInfoQueryVariables = {
 export type UserInfoQuery = { __typename?: "Query" } & {
   user: { __typename?: "User" } & Pick<
     User,
-    "id" | "username" | "joinedFactionAt" | "money" | "experience"
+    "id" | "username" | "joinedFactionAt" | "money" | "experience" | "level"
   > & {
       faction: Maybe<
         { __typename?: "Faction" } & Pick<Faction, "name" | "icon" | "color">

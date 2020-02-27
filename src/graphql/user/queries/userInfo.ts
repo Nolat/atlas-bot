@@ -13,6 +13,7 @@ export default gql`
       joinedFactionAt
       money
       experience
+      level
     }
   }
 `;
