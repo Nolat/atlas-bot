@@ -12,8 +12,8 @@ import { UserInfoQuery, UserInfoQueryVariables } from "generated/graphql";
 import { Command } from "types";
 
 // * Helpers
-import getLevelByXP from "./helpers/getLevelByXP";
 import getPercentOfNextLevel from "./helpers/getPercentOfNextLevel";
+import getXPLimitByLevel from "./helpers/getXPLimitByLevel";
 
 const InfoCommand: Command = {
   name: "info",
@@ -56,20 +56,22 @@ const getInfoForMember = async (message: Message, user: User) => {
 
   embed.addField("Monnaie", getMoneyString(message, data.user.money));
 
-  const xpLevel = getLevelByXP(data.user.experience || 0);
-  const percent = getPercentOfNextLevel(xpLevel.xp, xpLevel.nextXP);
+  if (faction) {
+    const nextXP = getXPLimitByLevel(data.user.level ? data.user.level + 1 : 1);
+    const percent = getPercentOfNextLevel(data.user.experience || 0, nextXP);
 
-  let xpBar = "";
-  for (let index = 10; index < percent; index += 10) xpBar += "🟩 ";
+    let xpBar = "";
+    for (let index = 10; index < percent; index += 10) xpBar += "🟩 ";
 
-  for (let index = 100; index > percent; index -= 10) xpBar += "⬜ ";
+    for (let index = 100; index > percent; index -= 10) xpBar += "⬜ ";
 
-  embed.addField(
-    "Experience",
-    `Niveau **${xpLevel.level}**
-  
-      ${xpBar}`
-  );
+    embed.addField(
+      "Experience",
+      `Niveau **${data.user.level || 0}**
+    
+        ${xpBar}`
+    );
+  }
 
   message.channel.send(embed);
 };
