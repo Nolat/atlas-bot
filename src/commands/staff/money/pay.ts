@@ -150,9 +150,9 @@ const payToMentions = async (
         .setTitle("🎉 Félicitations !")
         .setColor("GREEN")
         .setDescription(
-          `${user.toString()} a été crédité de ${getMoneyString(
-            money
-          )} par ${message.author.toString()}`
+          `${user} a été crédité de ${getMoneyString(money)} par ${
+            message.author
+          }`
         );
     }
 
