@@ -37,6 +37,8 @@ export type Mutation = {
   removeUserExperience: Experience;
   addFaction: Faction;
   removeFaction: Scalars["Boolean"];
+  addTitle: Title;
+  removeTitle: Scalars["Boolean"];
   setUserFaction: User;
   unsetUserFaction: User;
   giveUserMoney: User;
@@ -66,6 +68,17 @@ export type MutationRemoveFactionArgs = {
   name: Scalars["String"];
 };
 
+export type MutationAddTitleArgs = {
+  parentName?: Maybe<Scalars["String"]>;
+  factionName: Scalars["String"];
+  level: Scalars["Float"];
+  name: Scalars["String"];
+};
+
+export type MutationRemoveTitleArgs = {
+  name: Scalars["String"];
+};
+
 export type MutationSetUserFactionArgs = {
   factionName: Scalars["String"];
   id: Scalars["String"];
@@ -91,6 +104,8 @@ export type Query = {
   experience: Experience;
   factions: Array<Faction>;
   faction: Faction;
+  titles: Array<Title>;
+  title: Title;
   users: Array<User>;
   user: User;
 };
@@ -108,8 +123,27 @@ export type QueryFactionArgs = {
   name: Scalars["String"];
 };
 
+export type QueryTitlesArgs = {
+  factionName?: Maybe<Scalars["String"]>;
+};
+
+export type QueryTitleArgs = {
+  name: Scalars["String"];
+};
+
 export type QueryUserArgs = {
   id: Scalars["String"];
+};
+
+export type Title = {
+  __typename?: "Title";
+  id: Scalars["String"];
+  name: Scalars["String"];
+  level: Scalars["Float"];
+  parent?: Maybe<Title>;
+  faction: Faction;
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
 };
 
 export type User = {
@@ -198,6 +232,34 @@ export type FactionsQuery = { __typename?: "Query" } & {
       | "isJoinable"
     >
   >;
+};
+
+export type AddTitleMutationVariables = {
+  name: Scalars["String"];
+  level: Scalars["Float"];
+  factionName: Scalars["String"];
+  parentName?: Maybe<Scalars["String"]>;
+};
+
+export type AddTitleMutation = { __typename?: "Mutation" } & {
+  addTitle: { __typename?: "Title" } & Pick<Title, "id">;
+};
+
+export type RemoveTitleMutationVariables = {
+  name: Scalars["String"];
+};
+
+export type RemoveTitleMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "removeTitle"
+>;
+
+export type TitleQueryVariables = {
+  name: Scalars["String"];
+};
+
+export type TitleQuery = { __typename?: "Query" } & {
+  title: { __typename?: "Title" } & Pick<Title, "id">;
 };
 
 export type GiveUserMoneyMutationVariables = {
