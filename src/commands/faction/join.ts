@@ -62,7 +62,10 @@ const runJoin = async (message: Message) => {
 
   // * With faction
   if (data?.user.faction) {
-    const joinedDate = moment(Number(data?.user.joinedFactionAt!));
+    const joinedDate = moment(Number(data?.user.joinedFactionAt!)).subtract(
+      10,
+      "d"
+    );
 
     const daysSinceJoined = moment().diff(joinedDate, "d");
     const timeSinceJoined = joinedDate.locale("fr").fromNow();
@@ -147,9 +150,9 @@ const sendMessageAndGetReact = async (
       emojiListName.push(faction.icon);
   });
 
-  emojiListName.forEach(name => {
-    choiceFactionMessage.react(name);
-  });
+  for (const name of emojiListName) {
+    await choiceFactionMessage.react(name);
+  }
 
   const filter = (reaction: MessageReaction, user: User) => {
     return (

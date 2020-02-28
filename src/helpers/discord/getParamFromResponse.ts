@@ -51,7 +51,7 @@ const getParamFromResponse = async (
       })
       .then((collected: Collection<string, Message>) => {
         sentMessage.clearReactions();
-        resolve(collected.first().content);
+        if (collected.first()) resolve(collected.first().content);
       });
   });
 

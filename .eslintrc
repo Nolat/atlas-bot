@@ -48,7 +48,9 @@
       }
     ],
     "jest/no-hooks": "off",
+    "no-async-promise-executor": "off",
+    "no-await-in-loop": "off",
     "no-console": "off",
-    "no-async-promise-executor": "off"
+    "no-restricted-syntax": "off"
   }
 }
