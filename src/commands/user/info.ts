@@ -84,10 +84,10 @@ const getMoneyString = (message: Message, money: number): string => {
   const pa = Math.floor((money - pp * 1000000 - po * 10000) / 100);
   const pc = Math.floor(money - pp * 1000000 - po * 10000 - pa * 100);
 
-  const ppEmoji = message.guild.emojis.find(emoji => emoji.name.includes("pp"));
-  const poEmoji = message.guild.emojis.find(emoji => emoji.name.includes("po"));
-  const paEmoji = message.guild.emojis.find(emoji => emoji.name.includes("pa"));
-  const pcEmoji = message.guild.emojis.find(emoji => emoji.name.includes("pc"));
+  const ppEmoji = message.guild.emojis.find(emoji => emoji.name === "pp");
+  const poEmoji = message.guild.emojis.find(emoji => emoji.name === "po");
+  const paEmoji = message.guild.emojis.find(emoji => emoji.name === "pa");
+  const pcEmoji = message.guild.emojis.find(emoji => emoji.name === "pc");
 
   if (pp > 0)
     text =
