@@ -28,10 +28,26 @@ import {
   SetUserFactionMutation,
   SetUserFactionMutationVariables,
   UnsetUserFactionMutation,
-  UnsetUserFactionMutationVariables
+  UnsetUserFactionMutationVariables,
+  Faction
 } from "generated/graphql";
 import setUserFaction from "graphql/user/mutation/setUserFaction";
 import unsetUserFaction from "graphql/user/mutation/unsetUserFaction";
+
+// * Type
+type FactionType = {
+  __typename?: "Faction" | undefined;
+} & Pick<
+  Faction,
+  | "id"
+  | "name"
+  | "description"
+  | "icon"
+  | "color"
+  | "memberCount"
+  | "maxMember"
+  | "isJoinable"
+>;
 
 // * Constants
 const DAYS_LIMIT = 7;
@@ -147,9 +163,9 @@ const sendMessageAndGetReact = async (
       emojiListName.push(faction.icon);
   });
 
-  emojiListName.forEach(name => {
-    choiceFactionMessage.react(name);
-  });
+  for (const name of emojiListName) {
+    await choiceFactionMessage.react(name);
+  }
 
   const filter = (reaction: MessageReaction, user: User) => {
     return (
@@ -177,7 +193,7 @@ const getResponseAndSetFaction = async (
 ) => {
   const { id } = message.author;
 
-  const faction = data.factions.find((f: any) => f.icon === emoji)!;
+  const faction = data.factions.find((f: FactionType) => f.icon === emoji)!;
 
   if (currentFactionName)
     await client.mutate<
