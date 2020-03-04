@@ -3,6 +3,8 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
+import userFaction from "graphql/user/queries/userFaction";
+
 import faction from "graphql/faction/queries/faction";
 
 import removeUserExperience from "graphql/client/experience/mutations/removeUserExperience";
@@ -11,7 +13,9 @@ import {
   FactionQuery,
   FactionQueryVariables,
   RemoveUserExperienceMutation,
-  RemoveUserExperienceMutationVariables
+  RemoveUserExperienceMutationVariables,
+  UserFactionQuery,
+  UserFactionQueryVariables
 } from "generated/graphql";
 
 // * Helpers
@@ -58,7 +62,7 @@ const runRemoveXP = async (message: Message) => {
   }
 
   try {
-    const factionName = await askFactionName(message);
+    let factionName = await askFactionName(message);
 
     const experience = Number(
       await getParamFromResponse(
@@ -71,36 +75,60 @@ const runRemoveXP = async (message: Message) => {
 
     mentions.users.forEach(async user => {
       const { id } = user;
+      let factionError = false;
 
-      const { data, errors } = await client.mutate<
-        RemoveUserExperienceMutation,
-        RemoveUserExperienceMutationVariables
-      >({
-        mutation: removeUserExperience,
-        variables: { factionName, id, experience },
-        errorPolicy: "all"
-      });
+      if (!factionName) {
+        const { data } = await client.query<
+          UserFactionQuery,
+          UserFactionQueryVariables
+        >({
+          query: userFaction,
+          variables: { id },
+          errorPolicy: "all"
+        });
 
-      if (data?.removeUserExperience) {
-        embed
-          .setTitle("🎉 Succès !")
-          .setColor("GREEN")
-          .setDescription(
-            `${experience} point(s) d'expérience ont été retirés à ${user.toString()} pour la faction ${factionName}.`
-          );
+        if (data.user.faction) factionName = data.user.faction.name;
+        else {
+          embed
+            .setColor("RED")
+            .setTitle(":rotating_light: Erreur!")
+            .setDescription(`${user} n'est pas dans une faction.`);
+
+          factionError = true;
+        }
       }
 
-      if (errors) {
-        errors.forEach((error: any) => {
-          switch (error.extensions.code) {
-            default:
-              embed
-                .setColor("RED")
-                .setTitle(":rotating_light: Erreur innatendue !")
-                .setDescription(`Merci de contacter le Staff.`);
-              break;
-          }
+      if (!factionError) {
+        const { data, errors } = await client.mutate<
+          RemoveUserExperienceMutation,
+          RemoveUserExperienceMutationVariables
+        >({
+          mutation: removeUserExperience,
+          variables: { factionName, id, experience },
+          errorPolicy: "all"
         });
+
+        if (data?.removeUserExperience) {
+          embed
+            .setTitle("🎉 Succès !")
+            .setColor("GREEN")
+            .setDescription(
+              `${experience} point(s) d'expérience ont été retirés à ${user.toString()} pour la faction ${factionName}.`
+            );
+        }
+
+        if (errors) {
+          errors.forEach((error: any) => {
+            switch (error.extensions.code) {
+              default:
+                embed
+                  .setColor("RED")
+                  .setTitle(":rotating_light: Erreur innatendue !")
+                  .setDescription(`Merci de contacter le Staff.`);
+                break;
+            }
+          });
+        }
       }
 
       message.channel.send(embed);
@@ -124,17 +152,23 @@ const askFactionName = async (message: Message): Promise<string> => {
       message,
       QUESTION_TITLE,
       FACTION_QUESTION,
-      60000
+      60000,
+      true
     );
 
-    const { errors } = await client.query<FactionQuery, FactionQueryVariables>({
-      query: faction,
-      variables: { name },
-      errorPolicy: "all"
-    });
+    if (name) {
+      const { errors } = await client.query<
+        FactionQuery,
+        FactionQueryVariables
+      >({
+        query: faction,
+        variables: { name },
+        errorPolicy: "all"
+      });
 
-    if (!errors) resolve(name);
-    reject(new Error(`FACTION_DOESNT_EXIST:${name}`));
+      if (!errors) resolve(name);
+      reject(new Error(`FACTION_DOESNT_EXIST:${name}`));
+    } else resolve();
   });
 };
 
