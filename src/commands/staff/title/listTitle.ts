@@ -17,8 +17,8 @@ import {
   Title
 } from "generated/graphql";
 
-// * Helpers
-import getParamFromResponse from "helpers/discord/getParamFromResponse";
+// * Faction helpers
+import askFactionNameWithReact from "commands/helpers/faction/askFactionNameWithReact";
 
 // * Constants
 const QUESTION_TITLE = ":memo: Liste des titres";
@@ -50,7 +50,7 @@ const ListTitleCommand: Command = {
 };
 
 const runListTitle = async (message: Message) => {
-  const factionName = await getParamFromResponse(
+  const factionName = await askFactionNameWithReact(
     message,
     QUESTION_TITLE,
     FACTION_QUESTION,

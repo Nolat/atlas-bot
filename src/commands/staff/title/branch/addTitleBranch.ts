@@ -3,26 +3,21 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import faction from "graphql/faction/queries/faction";
-
-import titleBranch from "graphql/titleBranch/queries/titleBranch";
-
 import addTitleBranch from "graphql/titleBranch/mutations/addTitleBranch";
 
 import {
   AddTitleBranchMutation,
-  AddTitleBranchMutationVariables,
-  FactionQuery,
-  FactionQueryVariables,
-  TitleBranchQuery,
-  TitleBranchQueryVariables
+  AddTitleBranchMutationVariables
 } from "generated/graphql";
-
-// * Helper
-import getParamFromResponse from "helpers/discord/getParamFromResponse";
 
 // * Types
 import { Command } from "types";
+
+// * Branch helpers
+import askBranchName from "commands/helpers/title/branch/askBranchName";
+
+// * Faction helpers
+import askFactionNameWithReact from "commands/helpers/faction/askFactionNameWithReact";
 
 // * Constants
 const QUESTION_TITLE = ":pencil: Ajout d'une branche";
@@ -43,9 +38,21 @@ const runAddTitleBranch = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
 
   try {
-    const name = await askBranchName(message);
+    const name = await askBranchName(
+      message,
+      QUESTION_TITLE,
+      NAME_QUESTION,
+      60000,
+      false,
+      true
+    );
 
-    const factionName = await askFactionName(message);
+    const factionName = await askFactionNameWithReact(
+      message,
+      QUESTION_TITLE,
+      FACTION_NAME_QUESTION,
+      60000
+    );
 
     const { data, errors } = await client.mutate<
       AddTitleBranchMutation,
@@ -97,49 +104,6 @@ const runAddTitleBranch = async (message: Message) => {
   }
 
   message.channel.send(embed);
-};
-
-const askBranchName = async (message: Message): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    const name = await getParamFromResponse(
-      message,
-      QUESTION_TITLE,
-      NAME_QUESTION,
-      60000
-    );
-
-    const { errors } = await client.query<
-      TitleBranchQuery,
-      TitleBranchQueryVariables
-    >({
-      query: titleBranch,
-      variables: { name },
-      errorPolicy: "all"
-    });
-
-    if (errors) resolve(name);
-    reject(new Error(`BRANCH_ALREADY_EXIST:${name}`));
-  });
-};
-
-const askFactionName = async (message: Message): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    const name = await getParamFromResponse(
-      message,
-      QUESTION_TITLE,
-      FACTION_NAME_QUESTION,
-      60000
-    );
-
-    const { errors } = await client.query<FactionQuery, FactionQueryVariables>({
-      query: faction,
-      variables: { name },
-      errorPolicy: "all"
-    });
-
-    if (errors) reject(new Error(`FACTION_DOESNT_EXIST:${name}`));
-    resolve(name);
-  });
 };
 
 export default AddTitleBranchCommand;

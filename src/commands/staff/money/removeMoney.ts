@@ -17,8 +17,8 @@ import {
 } from "generated/graphql";
 
 // * Money helpers
-import askMoney from "./helpers/askMoney";
-import getMoneyString from "./helpers/getMoneyString";
+import askMoney from "commands/helpers/money/askMoney";
+import getMoneyString from "commands/helpers/money/getMoneyString";
 
 //* Constants
 const QUESTION_TITLE = ":moneybag: Retrait d'argent";
@@ -67,14 +67,13 @@ const runRemoveMoney = async (message: Message) => {
       errorPolicy: "all"
     });
 
-    if (data?.removeUserMoney) {
+    if (data?.removeUserMoney)
       embed
         .setTitle("🎉 Félicitations !")
         .setColor("GREEN")
         .setDescription(
           `${user.toString()} a perdu ${getMoneyString(amount)}.`
         );
-    }
 
     if (errors) {
       errors.forEach((error: any) => {

@@ -77,8 +77,8 @@ const runJoin = async (message: Message) => {
   });
 
   // * With faction
-  if (data?.user.faction) {
-    const joinedDate = moment(Number(data?.user.joinedFactionAt!));
+  if (data?.user.faction && data?.user.joinedFactionAt) {
+    const joinedDate = moment(Number(data?.user.joinedFactionAt));
 
     const daysSinceJoined = moment().diff(joinedDate, "d");
     const timeSinceJoined = joinedDate.locale("fr").fromNow();
@@ -193,33 +193,42 @@ const getResponseAndSetFaction = async (
 ) => {
   const { id } = message.author;
 
-  const faction = data.factions.find((f: FactionType) => f.icon === emoji)!;
+  const faction = data.factions.find((f: FactionType) => f.icon === emoji);
 
-  if (currentFactionName)
-    await client.mutate<
-      UnsetUserFactionMutation,
-      UnsetUserFactionMutationVariables
-    >({ mutation: unsetUserFaction, variables: { id } });
-
-  const result = await client.mutate<
-    SetUserFactionMutation,
-    SetUserFactionMutationVariables
-  >({
-    mutation: setUserFaction,
-    variables: { factionName: faction.name, id }
-  });
-
-  if (result.data) {
+  if (!faction) {
     const embed = new RichEmbed()
-      .setColor(faction.color)
-      .setTitle(`${faction.icon} Félicitation !`)
-      .setDescription(
-        `${message.author.toString()} tu es maintenant membre de ${
-          faction.name
-        }.`
-      );
+      .setColor("RED")
+      .setTitle(":rotating_light: Erreur innatendue !")
+      .setDescription(`Merci de contacter le Staff.`);
 
     message.channel.send({ embed });
+  } else {
+    if (currentFactionName)
+      await client.mutate<
+        UnsetUserFactionMutation,
+        UnsetUserFactionMutationVariables
+      >({ mutation: unsetUserFaction, variables: { id } });
+
+    const result = await client.mutate<
+      SetUserFactionMutation,
+      SetUserFactionMutationVariables
+    >({
+      mutation: setUserFaction,
+      variables: { factionName: faction.name, id }
+    });
+
+    if (result.data) {
+      const embed = new RichEmbed()
+        .setColor(faction.color)
+        .setTitle(`${faction.icon} Félicitation !`)
+        .setDescription(
+          `Tu es maintenant membre de ${
+            faction.name
+          }, ${message.author.toString()}!`
+        );
+
+      message.channel.send({ embed });
+    }
   }
 };
 

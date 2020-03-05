@@ -15,8 +15,8 @@ import {
   Faction
 } from "generated/graphql";
 
-// * Helpers
-import getParamFromResponse from "helpers/discord/getParamFromResponse";
+// * Faction helpers
+import askFactionNameWithReact from "commands/helpers/faction/askFactionNameWithReact";
 
 // * Constants
 const QUESTION_TITLE = ":memo: Liste des branches";
@@ -46,7 +46,7 @@ const ListTitleBranchCommand: Command = {
 };
 
 const runListBrachTitle = async (message: Message) => {
-  const factionName = await getParamFromResponse(
+  const factionName = await askFactionNameWithReact(
     message,
     QUESTION_TITLE,
     FACTION_QUESTION,

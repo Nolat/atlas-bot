@@ -47,12 +47,11 @@ const runRemoveFaction = async (message: Message) => {
     errorPolicy: "all"
   });
 
-  if (data?.removeFaction) {
+  if (data?.removeFaction)
     embed
       .setTitle("🎉 Félicitations !")
       .setColor("GREEN")
       .setDescription(`La faction ${name} a bien été suprimée.`);
-  }
 
   if (errors) {
     errors.forEach((error: any) => {

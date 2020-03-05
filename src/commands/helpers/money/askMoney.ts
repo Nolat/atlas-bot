@@ -14,6 +14,7 @@ const askMoney = async (
     HOW_QUESTION,
     60000
   );
+
   const values = params.split(" ");
   let money = 0;
 

@@ -17,8 +17,8 @@ import {
 } from "generated/graphql";
 
 // * Money helpers
-import askMoney from "./helpers/askMoney";
-import getMoneyString from "./helpers/getMoneyString";
+import askMoney from "commands/helpers/money/askMoney";
+import getMoneyString from "commands/helpers/money/getMoneyString";
 
 //* Constants
 const QUESTION_TITLE = ":moneybag: Gain d'argent";
@@ -67,12 +67,11 @@ const runAddMoney = async (message: Message) => {
       errorPolicy: "all"
     });
 
-    if (data?.giveUserMoney) {
+    if (data?.giveUserMoney)
       embed
         .setTitle("🎉 Félicitations !")
         .setColor("GREEN")
         .setDescription(`${user.toString()} a reçu ${getMoneyString(money)}.`);
-    }
 
     if (errors) {
       errors.forEach((error: any) => {

@@ -5,13 +5,9 @@ import client from "graphql/client";
 
 import userFaction from "graphql/user/queries/userFaction";
 
-import faction from "graphql/faction/queries/faction";
-
 import giveUserExperience from "graphql/client/experience/mutations/giveUserExperience";
 
 import {
-  FactionQuery,
-  FactionQueryVariables,
   GiveUserExperienceMutation,
   GiveUserExperienceMutationVariables,
   UserFactionQuery,
@@ -24,6 +20,10 @@ import getParamFromResponse from "helpers/discord/getParamFromResponse";
 
 // * Types
 import { Command } from "types";
+
+// * Faction helpers
+import askFactionNameWithReact from "commands/helpers/faction/askFactionNameWithReact";
+import askFactionName from "commands/helpers/faction/askFactionName";
 
 // * Constants
 const QUESTION_TITLE = ":sparkles: Ajout d'expérience";
@@ -62,7 +62,13 @@ const runAddXP = async (message: Message) => {
   }
 
   try {
-    let factionName = await askFactionName(message);
+    let factionName = await askFactionNameWithReact(
+      message,
+      QUESTION_TITLE,
+      FACTION_QUESTION,
+      60000,
+      true
+    );
 
     const experience = Number(
       await getParamFromResponse(
@@ -84,7 +90,8 @@ const runAddXP = async (message: Message) => {
         >({
           query: userFaction,
           variables: { id },
-          errorPolicy: "all"
+          errorPolicy: "all",
+          fetchPolicy: "network-only"
         });
 
         if (data.user.faction) factionName = data.user.faction.name;
@@ -149,32 +156,6 @@ const runAddXP = async (message: Message) => {
         .setDescription(`${message.author} n'est pas membre d'une Faction.`);
     }
   }
-};
-
-const askFactionName = async (message: Message): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    const name = await getParamFromResponse(
-      message,
-      QUESTION_TITLE,
-      FACTION_QUESTION,
-      60000,
-      true
-    );
-
-    if (name) {
-      const { errors } = await client.query<
-        FactionQuery,
-        FactionQueryVariables
-      >({
-        query: faction,
-        variables: { name },
-        errorPolicy: "all"
-      });
-
-      if (!errors) resolve(name);
-      reject(new Error(`FACTION_DOESNT_EXIST:${name}`));
-    } else resolve();
-  });
 };
 
 export default addExperienceCommand;

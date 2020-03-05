@@ -4,7 +4,7 @@ import { RichEmbed } from "discord.js";
 import { client } from "utils/discordClient";
 
 // * Environment variables
-const COMMAND_PREFIX: string = process.env.COMMAND_PREFIX!;
+const { COMMAND_PREFIX } = process.env;
 
 const getHelpForCommands = (
   aliases: string[],
@@ -29,8 +29,8 @@ const getHelpForCommands = (
   uniqueCommands.forEach(command => {
     if (command) {
       embed.addField(
-        `${COMMAND_PREFIX}${command!.name} ${command!.usage}`,
-        command!.description
+        `${COMMAND_PREFIX}${command.name} ${command.usage}`,
+        command.description
       );
     }
   });

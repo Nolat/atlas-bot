@@ -3,19 +3,18 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import faction from "graphql/faction/queries/faction";
-
 import addFaction from "graphql/faction/mutations/addFaction";
 
 import {
-  FactionQuery,
-  FactionQueryVariables,
   AddFactionMutation,
   AddFactionMutationVariables
 } from "generated/graphql";
 
 // * Helper
 import getParamFromResponse from "helpers/discord/getParamFromResponse";
+
+// * Faction helpers
+import askFactionName from "commands/helpers/faction/askFactionName";
 
 // * Types
 import { Command } from "types";
@@ -42,7 +41,14 @@ const runAddFaction = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
 
   try {
-    const name = await askFactionName(message);
+    const name = await askFactionName(
+      message,
+      QUESTION_TITLE,
+      NAME_QUESTION,
+      600000,
+      false,
+      true
+    );
 
     const description = await getParamFromResponse(
       message,
@@ -74,12 +80,11 @@ const runAddFaction = async (message: Message) => {
       errorPolicy: "all"
     });
 
-    if (data?.addFaction) {
+    if (data?.addFaction)
       embed
         .setTitle("🎉 Félicitations !")
         .setColor("GREEN")
         .setDescription(`La faction ${name} a bien été créée.`);
-    }
 
     if (errors) {
       errors.forEach((error: any) => {
@@ -104,26 +109,6 @@ const runAddFaction = async (message: Message) => {
   }
 
   message.channel.send(embed);
-};
-
-const askFactionName = async (message: Message): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    const name = await getParamFromResponse(
-      message,
-      QUESTION_TITLE,
-      NAME_QUESTION,
-      60000
-    );
-
-    const { errors } = await client.query<FactionQuery, FactionQueryVariables>({
-      query: faction,
-      variables: { name },
-      errorPolicy: "all"
-    });
-
-    if (errors) resolve(name);
-    reject(new Error(`FACTION_ALREADY_EXIST:${name}`));
-  });
 };
 
 export default AddFactionCommand;

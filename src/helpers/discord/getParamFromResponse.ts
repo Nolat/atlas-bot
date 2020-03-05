@@ -28,9 +28,7 @@ const getParamFromResponse = async (
     const sentMessage = (await channel.send(embed)) as Message;
 
     if (optional) {
-      const noEmoji = message.guild.emojis.find(emoji =>
-        emoji.name.includes("no")
-      );
+      const noEmoji = message.guild.emojis.find(emoji => emoji.name === "no");
 
       sentMessage.react(noEmoji);
 
