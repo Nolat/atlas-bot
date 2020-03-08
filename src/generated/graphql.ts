@@ -15,6 +15,8 @@ export type Experience = {
   faction: Faction;
   value: Scalars["Float"];
   level: Scalars["Float"];
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
 };
 
 export type Faction = {
@@ -37,6 +39,10 @@ export type Mutation = {
   removeUserExperience: Experience;
   addFaction: Faction;
   removeFaction: Scalars["Boolean"];
+  addTitle: Title;
+  removeTitle: Scalars["Boolean"];
+  addTitleBranch: TitleBranch;
+  removeTitleBranch: Scalars["Boolean"];
   setUserFaction: User;
   unsetUserFaction: User;
   giveUserMoney: User;
@@ -66,6 +72,27 @@ export type MutationRemoveFactionArgs = {
   name: Scalars["String"];
 };
 
+export type MutationAddTitleArgs = {
+  parentName?: Maybe<Scalars["String"]>;
+  branchName?: Maybe<Scalars["String"]>;
+  factionName?: Maybe<Scalars["String"]>;
+  level?: Maybe<Scalars["Float"]>;
+  name: Scalars["String"];
+};
+
+export type MutationRemoveTitleArgs = {
+  name: Scalars["String"];
+};
+
+export type MutationAddTitleBranchArgs = {
+  factionName: Scalars["String"];
+  name: Scalars["String"];
+};
+
+export type MutationRemoveTitleBranchArgs = {
+  name: Scalars["String"];
+};
+
 export type MutationSetUserFactionArgs = {
   factionName: Scalars["String"];
   id: Scalars["String"];
@@ -91,6 +118,10 @@ export type Query = {
   experience: Experience;
   factions: Array<Faction>;
   faction: Faction;
+  titles: Array<Title>;
+  title: Title;
+  titleBranches: Array<TitleBranch>;
+  titleBranch: TitleBranch;
   users: Array<User>;
   user: User;
 };
@@ -108,19 +139,68 @@ export type QueryFactionArgs = {
   name: Scalars["String"];
 };
 
+export type QueryTitlesArgs = {
+  branchName?: Maybe<Scalars["String"]>;
+  factionName?: Maybe<Scalars["String"]>;
+};
+
+export type QueryTitleArgs = {
+  name: Scalars["String"];
+};
+
+export type QueryTitleBranchesArgs = {
+  factionName?: Maybe<Scalars["String"]>;
+};
+
+export type QueryTitleBranchArgs = {
+  name: Scalars["String"];
+};
+
 export type QueryUserArgs = {
   id: Scalars["String"];
+};
+
+export type Title = {
+  __typename?: "Title";
+  id: Scalars["String"];
+  name: Scalars["String"];
+  level?: Maybe<Scalars["Float"]>;
+  branch?: Maybe<TitleBranch>;
+  faction?: Maybe<Faction>;
+  parent?: Maybe<Title>;
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
+};
+
+export type TitleBranch = {
+  __typename?: "TitleBranch";
+  id: Scalars["String"];
+  name: Scalars["String"];
+  faction: Faction;
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
 };
 
 export type User = {
   __typename?: "User";
   id: Scalars["String"];
   username: Scalars["String"];
+  titles: UserTitle;
   faction?: Maybe<Faction>;
   joinedFactionAt?: Maybe<Scalars["String"]>;
   money: Scalars["Float"];
   experience?: Maybe<Scalars["Float"]>;
   level?: Maybe<Scalars["Float"]>;
+  createdAt: Scalars["String"];
+  updatedAt: Scalars["String"];
+};
+
+export type UserTitle = {
+  __typename?: "UserTitle";
+  id: Scalars["String"];
+  user: User;
+  title: Title;
+  isEnabled: Scalars["Boolean"];
   createdAt: Scalars["String"];
   updatedAt: Scalars["String"];
 };
@@ -197,6 +277,89 @@ export type FactionsQuery = { __typename?: "Query" } & {
       | "maxMember"
       | "isJoinable"
     >
+  >;
+};
+
+export type AddTitleMutationVariables = {
+  name: Scalars["String"];
+  level?: Maybe<Scalars["Float"]>;
+  factionName?: Maybe<Scalars["String"]>;
+  branchName?: Maybe<Scalars["String"]>;
+  parentName?: Maybe<Scalars["String"]>;
+};
+
+export type AddTitleMutation = { __typename?: "Mutation" } & {
+  addTitle: { __typename?: "Title" } & Pick<Title, "id">;
+};
+
+export type RemoveTitleMutationVariables = {
+  name: Scalars["String"];
+};
+
+export type RemoveTitleMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "removeTitle"
+>;
+
+export type TitleQueryVariables = {
+  name: Scalars["String"];
+};
+
+export type TitleQuery = { __typename?: "Query" } & {
+  title: { __typename?: "Title" } & Pick<Title, "id">;
+};
+
+export type TitlesQueryVariables = {
+  factionName?: Maybe<Scalars["String"]>;
+};
+
+export type TitlesQuery = { __typename?: "Query" } & {
+  titles: Array<
+    { __typename?: "Title" } & Pick<Title, "id" | "name" | "level"> & {
+        parent: Maybe<{ __typename?: "Title" } & Pick<Title, "id" | "name">>;
+        faction: Maybe<{ __typename?: "Faction" } & Pick<Faction, "name">>;
+        branch: Maybe<
+          { __typename?: "TitleBranch" } & Pick<TitleBranch, "name">
+        >;
+      }
+  >;
+};
+
+export type AddTitleBranchMutationVariables = {
+  name: Scalars["String"];
+  factionName: Scalars["String"];
+};
+
+export type AddTitleBranchMutation = { __typename?: "Mutation" } & {
+  addTitleBranch: { __typename?: "TitleBranch" } & Pick<TitleBranch, "id">;
+};
+
+export type RemoveTitleBranchMutationVariables = {
+  name: Scalars["String"];
+};
+
+export type RemoveTitleBranchMutation = { __typename?: "Mutation" } & Pick<
+  Mutation,
+  "removeTitleBranch"
+>;
+
+export type TitleBranchQueryVariables = {
+  name: Scalars["String"];
+};
+
+export type TitleBranchQuery = { __typename?: "Query" } & {
+  titleBranch: { __typename?: "TitleBranch" } & Pick<TitleBranch, "id">;
+};
+
+export type TitleBranchesQueryVariables = {
+  factionName?: Maybe<Scalars["String"]>;
+};
+
+export type TitleBranchesQuery = { __typename?: "Query" } & {
+  titleBranches: Array<
+    { __typename?: "TitleBranch" } & Pick<TitleBranch, "id" | "name"> & {
+        faction: { __typename?: "Faction" } & Pick<Faction, "id" | "name">;
+      }
   >;
 };
 

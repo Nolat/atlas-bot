@@ -3,15 +3,15 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import faction from "graphql/faction/queries/faction";
+import userFaction from "graphql/user/queries/userFaction";
 
 import giveUserExperience from "graphql/client/experience/mutations/giveUserExperience";
 
 import {
-  FactionQuery,
-  FactionQueryVariables,
   GiveUserExperienceMutation,
-  GiveUserExperienceMutationVariables
+  GiveUserExperienceMutationVariables,
+  UserFactionQuery,
+  UserFactionQueryVariables
 } from "generated/graphql";
 
 // * Helpers
@@ -21,12 +21,16 @@ import getParamFromResponse from "helpers/discord/getParamFromResponse";
 // * Types
 import { Command } from "types";
 
+// * Faction helpers
+import askFactionNameWithReact from "commands/helpers/faction/askFactionNameWithReact";
+import askFactionName from "commands/helpers/faction/askFactionName";
+
 // * Constants
 const QUESTION_TITLE = ":sparkles: Ajout d'expérience";
 const USER_QUESTION =
   "À quel(s) joueur(s) voulez-vous ajouter de l'expérience ?";
 const FACTION_QUESTION =
-  "Dans quelle faction voulez-vous que le(s) joueur(s) reçoive(nt) l'expérience ?";
+  "Dans quelle faction voulez-vous que le(s) joueur(s) reçoive(nt) l'expérience ? (Optionnel, si non précisé, l'expérience sera affectée à la faction actuelle de chaque membre)";
 const AMOUNT_QUESTION = "Combien de points d'expérience voulez-vous ajouter ?";
 
 const addExperienceCommand: Command = {
@@ -58,7 +62,13 @@ const runAddXP = async (message: Message) => {
   }
 
   try {
-    const factionName = await askFactionName(message);
+    let factionName = await askFactionNameWithReact(
+      message,
+      QUESTION_TITLE,
+      FACTION_QUESTION,
+      60000,
+      true
+    );
 
     const experience = Number(
       await getParamFromResponse(
@@ -71,36 +81,61 @@ const runAddXP = async (message: Message) => {
 
     mentions.users.forEach(async user => {
       const { id } = user;
+      let factionError = false;
 
-      const { data, errors } = await client.mutate<
-        GiveUserExperienceMutation,
-        GiveUserExperienceMutationVariables
-      >({
-        mutation: giveUserExperience,
-        variables: { factionName, id, experience },
-        errorPolicy: "all"
-      });
+      if (!factionName) {
+        const { data } = await client.query<
+          UserFactionQuery,
+          UserFactionQueryVariables
+        >({
+          query: userFaction,
+          variables: { id },
+          errorPolicy: "all",
+          fetchPolicy: "network-only"
+        });
 
-      if (data?.giveUserExperience) {
-        embed
-          .setTitle("🎉 Félicitations !")
-          .setColor("GREEN")
-          .setDescription(
-            `${user.toString()} a reçu ${experience} point(s) d'expérience chez ${factionName}.`
-          );
+        if (data.user.faction) factionName = data.user.faction.name;
+        else {
+          embed
+            .setColor("RED")
+            .setTitle(":rotating_light: Erreur!")
+            .setDescription(`${user} n'est pas dans une faction.`);
+
+          factionError = true;
+        }
       }
 
-      if (errors) {
-        errors.forEach((error: any) => {
-          switch (error.extensions.code) {
-            default:
-              embed
-                .setColor("RED")
-                .setTitle(":rotating_light: Erreur innatendue !")
-                .setDescription(`Merci de contacter le Staff.`);
-              break;
-          }
+      if (!factionError) {
+        const { data, errors } = await client.mutate<
+          GiveUserExperienceMutation,
+          GiveUserExperienceMutationVariables
+        >({
+          mutation: giveUserExperience,
+          variables: { factionName, id, experience },
+          errorPolicy: "all"
         });
+
+        if (data?.giveUserExperience) {
+          embed
+            .setTitle("🎉 Félicitations !")
+            .setColor("GREEN")
+            .setDescription(
+              `${user.toString()} a reçu ${experience} point(s) d'expérience chez ${factionName}.`
+            );
+        }
+
+        if (errors) {
+          errors.forEach((error: any) => {
+            switch (error.extensions.code) {
+              default:
+                embed
+                  .setColor("RED")
+                  .setTitle(":rotating_light: Erreur innatendue !")
+                  .setDescription(`Merci de contacter le Staff.`);
+                break;
+            }
+          });
+        }
       }
 
       message.channel.send(embed);
@@ -114,28 +149,13 @@ const runAddXP = async (message: Message) => {
         .setDescription(`La faction ${arg} n'existe pas.`);
     }
 
-    message.channel.send(embed);
+    if (error.message.includes("USER_NOT_IN_FACTION")) {
+      embed
+        .setColor("RED")
+        .setTitle(":rotating_light: Ajout impossible !")
+        .setDescription(`${message.author} n'est pas membre d'une Faction.`);
+    }
   }
-};
-
-const askFactionName = async (message: Message): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    const name = await getParamFromResponse(
-      message,
-      QUESTION_TITLE,
-      FACTION_QUESTION,
-      60000
-    );
-
-    const { errors } = await client.query<FactionQuery, FactionQueryVariables>({
-      query: faction,
-      variables: { name },
-      errorPolicy: "all"
-    });
-
-    if (!errors) resolve(name);
-    reject(new Error(`FACTION_DOESNT_EXIST:${name}`));
-  });
 };
 
 export default addExperienceCommand;

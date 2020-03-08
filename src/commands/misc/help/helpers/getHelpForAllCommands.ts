@@ -7,7 +7,7 @@ import { CommandInArray } from "types";
 import { client } from "utils/discordClient";
 
 // * Environment variables
-const COMMAND_PREFIX: string = process.env.COMMAND_PREFIX!;
+const { COMMAND_PREFIX } = process.env;
 
 const getHelpForAllCommands = (isStaff = false): RichEmbed => {
   const embed = new RichEmbed().setTitle("Aide aux commandes").setColor("GOLD");

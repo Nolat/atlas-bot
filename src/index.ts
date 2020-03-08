@@ -1,6 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable import/namespace */
 import "reflect-metadata";
 import "cross-fetch/polyfill";
 import "lib/env";
+import * as environment from "environment";
+
 import express from "express";
 
 // * CommandHandler
@@ -10,7 +14,7 @@ import { CommandHandler } from "utils/commandHandler";
 import { client } from "utils/discordClient";
 
 // * Environment variables
-const PORT: number = parseInt(process.env.PORT!, 10);
+const PORT: number = parseInt(process.env.PORT, 10);
 
 const initApp = () => {
   // * Create new command handler

@@ -3,11 +3,11 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import removeFaction from "graphql/faction/mutations/removeFaction";
+import removeTitle from "graphql/title/mutations/removeTitle";
 
 import {
-  RemoveFactionMutation,
-  RemoveFactionMutationVariables
+  RemoveTitleMutation,
+  RemoveTitleMutationVariables
 } from "generated/graphql";
 
 // * Helper
@@ -17,19 +17,19 @@ import getParamFromResponse from "helpers/discord/getParamFromResponse";
 import { Command } from "types";
 
 // * Constants
-const QUESTION_TITLE = "🗑️ Suppression d'une faction";
-const NAME_QUESTION = "Quel est le nom de la faction à supprimer ?";
+const QUESTION_TITLE = "🗑️ Suppression d'un titre";
+const NAME_QUESTION = "Quel est le nom du titre à supprimer ?";
 
-const RemoveFactionCommand: Command = {
-  name: "removeFaction",
-  aliases: ["rf", "rmFaction"],
+const RemoveTitleCommand: Command = {
+  name: "removeTitle",
+  aliases: ["rt", "rmTitle"],
   usage: "",
-  description: "Supprime une faction",
+  description: "Supprime un titre",
   onlyStaff: true,
-  run: (message: Message) => runRemoveFaction(message)
+  run: (message: Message) => runRemoveTitle(message)
 };
 
-const runRemoveFaction = async (message: Message) => {
+const runRemoveTitle = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
   const name = await getParamFromResponse(
     message,
@@ -39,28 +39,29 @@ const runRemoveFaction = async (message: Message) => {
   );
 
   const { data, errors } = await client.mutate<
-    RemoveFactionMutation,
-    RemoveFactionMutationVariables
+    RemoveTitleMutation,
+    RemoveTitleMutationVariables
   >({
-    mutation: removeFaction,
+    mutation: removeTitle,
     variables: { name },
     errorPolicy: "all"
   });
 
-  if (data?.removeFaction)
+  if (data?.removeTitle) {
     embed
       .setTitle("🎉 Félicitations !")
       .setColor("GREEN")
-      .setDescription(`La faction ${name} a bien été suprimée.`);
+      .setDescription(`Le titre ${name} a bien été suprimée.`);
+  }
 
   if (errors) {
     errors.forEach((error: any) => {
       switch (error.extensions.code) {
-        case "CANNOT_FIND_FACTION":
+        case "CANNOT_FIND_TITLE":
           embed
             .setColor("RED")
             .setTitle(":rotating_light: Suppression impossible !")
-            .setDescription(`La faction ${name} n'existe pas.`);
+            .setDescription(`Le titre ${name} n'existe pas.`);
           break;
         default:
           embed
@@ -75,4 +76,4 @@ const runRemoveFaction = async (message: Message) => {
   message.channel.send(embed);
 };
 
-export default RemoveFactionCommand;
+export default RemoveTitleCommand;

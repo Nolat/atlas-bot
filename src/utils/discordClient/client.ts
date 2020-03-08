@@ -5,7 +5,7 @@ import { Message } from "discord.js";
 import { CommandHandler } from "utils/commandHandler";
 
 // * Environment variables
-const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN!;
+const { DISCORD_TOKEN } = process.env;
 
 @Discord
 export default class DiscordClient {

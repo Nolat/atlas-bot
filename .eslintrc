@@ -29,7 +29,6 @@
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/indent": "off",
     "@typescript-eslint/no-use-before-define": "off",
-    "@typescript-eslint/no-non-null-assertion": "off",
     "class-methods-use-this": "off",
     "import/prefer-default-export": "off",
     "import/no-unresolved": [2, { "commonjs": true, "amd": true }],
@@ -48,7 +47,9 @@
       }
     ],
     "jest/no-hooks": "off",
+    "no-async-promise-executor": "off",
+    "no-await-in-loop": "off",
     "no-console": "off",
-    "no-async-promise-executor": "off"
+    "no-restricted-syntax": "off"
   }
 }

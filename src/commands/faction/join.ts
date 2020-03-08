@@ -28,10 +28,26 @@ import {
   SetUserFactionMutation,
   SetUserFactionMutationVariables,
   UnsetUserFactionMutation,
-  UnsetUserFactionMutationVariables
+  UnsetUserFactionMutationVariables,
+  Faction
 } from "generated/graphql";
 import setUserFaction from "graphql/user/mutation/setUserFaction";
 import unsetUserFaction from "graphql/user/mutation/unsetUserFaction";
+
+// * Type
+type FactionType = {
+  __typename?: "Faction" | undefined;
+} & Pick<
+  Faction,
+  | "id"
+  | "name"
+  | "description"
+  | "icon"
+  | "color"
+  | "memberCount"
+  | "maxMember"
+  | "isJoinable"
+>;
 
 // * Constants
 const DAYS_LIMIT = 7;
@@ -61,8 +77,8 @@ const runJoin = async (message: Message) => {
   });
 
   // * With faction
-  if (data?.user.faction) {
-    const joinedDate = moment(Number(data?.user.joinedFactionAt!));
+  if (data?.user.faction && data?.user.joinedFactionAt) {
+    const joinedDate = moment(Number(data?.user.joinedFactionAt));
 
     const daysSinceJoined = moment().diff(joinedDate, "d");
     const timeSinceJoined = joinedDate.locale("fr").fromNow();
@@ -147,9 +163,9 @@ const sendMessageAndGetReact = async (
       emojiListName.push(faction.icon);
   });
 
-  emojiListName.forEach(name => {
-    choiceFactionMessage.react(name);
-  });
+  for (const name of emojiListName) {
+    await choiceFactionMessage.react(name);
+  }
 
   const filter = (reaction: MessageReaction, user: User) => {
     return (
@@ -177,33 +193,42 @@ const getResponseAndSetFaction = async (
 ) => {
   const { id } = message.author;
 
-  const faction = data.factions.find((f: any) => f.icon === emoji)!;
+  const faction = data.factions.find((f: FactionType) => f.icon === emoji);
 
-  if (currentFactionName)
-    await client.mutate<
-      UnsetUserFactionMutation,
-      UnsetUserFactionMutationVariables
-    >({ mutation: unsetUserFaction, variables: { id } });
-
-  const result = await client.mutate<
-    SetUserFactionMutation,
-    SetUserFactionMutationVariables
-  >({
-    mutation: setUserFaction,
-    variables: { factionName: faction.name, id }
-  });
-
-  if (result.data) {
+  if (!faction) {
     const embed = new RichEmbed()
-      .setColor(faction.color)
-      .setTitle(`${faction.icon} Félicitation !`)
-      .setDescription(
-        `${message.author.toString()} tu es maintenant membre de ${
-          faction.name
-        }.`
-      );
+      .setColor("RED")
+      .setTitle(":rotating_light: Erreur innatendue !")
+      .setDescription(`Merci de contacter le Staff.`);
 
     message.channel.send({ embed });
+  } else {
+    if (currentFactionName)
+      await client.mutate<
+        UnsetUserFactionMutation,
+        UnsetUserFactionMutationVariables
+      >({ mutation: unsetUserFaction, variables: { id } });
+
+    const result = await client.mutate<
+      SetUserFactionMutation,
+      SetUserFactionMutationVariables
+    >({
+      mutation: setUserFaction,
+      variables: { factionName: faction.name, id }
+    });
+
+    if (result.data) {
+      const embed = new RichEmbed()
+        .setColor(faction.color)
+        .setTitle(`${faction.icon} Félicitation !`)
+        .setDescription(
+          `Tu es maintenant membre de ${
+            faction.name
+          }, ${message.author.toString()}!`
+        );
+
+      message.channel.send({ embed });
+    }
   }
 };
 

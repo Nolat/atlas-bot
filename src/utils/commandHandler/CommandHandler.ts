@@ -10,7 +10,7 @@ import isObjectCommand from "./helpers/isObjectCommand";
 import isMemberStaff from "./helpers/isMemberStaff";
 
 // * Environment variables
-const COMMAND_PREFIX: string = process.env.COMMAND_PREFIX!;
+const { COMMAND_PREFIX } = process.env;
 
 export default class CommandHandler {
   commandsArray: CommandInArray[];

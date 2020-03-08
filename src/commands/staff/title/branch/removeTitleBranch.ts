@@ -3,11 +3,11 @@ import { Message, RichEmbed } from "discord.js";
 // * GraphQL
 import client from "graphql/client";
 
-import removeFaction from "graphql/faction/mutations/removeFaction";
+import removeTitleBranch from "graphql/titleBranch/mutations/removeTitleBranch";
 
 import {
-  RemoveFactionMutation,
-  RemoveFactionMutationVariables
+  RemoveTitleBranchMutation,
+  RemoveTitleBranchMutationVariables
 } from "generated/graphql";
 
 // * Helper
@@ -17,19 +17,19 @@ import getParamFromResponse from "helpers/discord/getParamFromResponse";
 import { Command } from "types";
 
 // * Constants
-const QUESTION_TITLE = "🗑️ Suppression d'une faction";
-const NAME_QUESTION = "Quel est le nom de la faction à supprimer ?";
+const QUESTION_TITLE = "🗑️ Suppression d'une branche";
+const NAME_QUESTION = "Quel est le nom de la branche à supprimer ?";
 
-const RemoveFactionCommand: Command = {
-  name: "removeFaction",
-  aliases: ["rf", "rmFaction"],
+const RemoveTitleBranchCommand: Command = {
+  name: "removeBranch",
+  aliases: ["rb", "rmBranch"],
   usage: "",
-  description: "Supprime une faction",
+  description: "Supprime une branche de titre",
   onlyStaff: true,
-  run: (message: Message) => runRemoveFaction(message)
+  run: (message: Message) => runRemoveTitleBranch(message)
 };
 
-const runRemoveFaction = async (message: Message) => {
+const runRemoveTitleBranch = async (message: Message) => {
   const embed: RichEmbed = new RichEmbed();
   const name = await getParamFromResponse(
     message,
@@ -39,28 +39,29 @@ const runRemoveFaction = async (message: Message) => {
   );
 
   const { data, errors } = await client.mutate<
-    RemoveFactionMutation,
-    RemoveFactionMutationVariables
+    RemoveTitleBranchMutation,
+    RemoveTitleBranchMutationVariables
   >({
-    mutation: removeFaction,
+    mutation: removeTitleBranch,
     variables: { name },
     errorPolicy: "all"
   });
 
-  if (data?.removeFaction)
+  if (data?.removeTitleBranch) {
     embed
       .setTitle("🎉 Félicitations !")
       .setColor("GREEN")
-      .setDescription(`La faction ${name} a bien été suprimée.`);
+      .setDescription(`La brach ${name} a bien été suprimée.`);
+  }
 
   if (errors) {
     errors.forEach((error: any) => {
       switch (error.extensions.code) {
-        case "CANNOT_FIND_FACTION":
+        case "CANNOT_FIND_BRANCH":
           embed
             .setColor("RED")
             .setTitle(":rotating_light: Suppression impossible !")
-            .setDescription(`La faction ${name} n'existe pas.`);
+            .setDescription(`La branche ${name} n'existe pas.`);
           break;
         default:
           embed
@@ -75,4 +76,4 @@ const runRemoveFaction = async (message: Message) => {
   message.channel.send(embed);
 };
 
-export default RemoveFactionCommand;
+export default RemoveTitleBranchCommand;
