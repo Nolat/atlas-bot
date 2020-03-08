@@ -86,7 +86,7 @@ const runJoin = async (message: Message) => {
     const dateAble = joinedDate.add(7, "d");
     const timeUntilAble = dateAble.locale("fr").toNow(true);
 
-    if (daysSinceJoined > DAYS_LIMIT)
+    if (daysSinceJoined >= DAYS_LIMIT)
       handleEmbed(message, embed, data.user.faction.name);
     else {
       embed
