@@ -20,7 +20,7 @@ import {
 import askMoney from "commands/helpers/money/askMoney";
 import getMoneyString from "commands/helpers/money/getMoneyString";
 
-//* Constants
+// * Constants
 const QUESTION_TITLE = ":moneybag: Gain d'argent";
 const USER_QUESTION = "À quel(s) joueur(s) voulez-vous ajouter de l'argent ?";
 const HOW_QUESTION = "Combien d'argent voulez-vous ajouter ? (ex: 1po 3pa 1pc)";

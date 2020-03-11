@@ -14,7 +14,7 @@ const getMentionsFromResponse = async (
   const embed: RichEmbed = new RichEmbed()
     .setTitle(title)
     .setDescription(question)
-    .addField("Temps", `${displayTime}min`)
+    .setFooter(`Vous avez ${displayTime}min pour répondre`)
     .setColor("GOLD");
 
   await channel.send(embed);

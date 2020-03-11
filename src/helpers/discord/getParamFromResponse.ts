@@ -22,7 +22,7 @@ const getParamFromResponse = async (
     const embed: RichEmbed = new RichEmbed()
       .setTitle(title)
       .setDescription(question)
-      .addField("Temps", `${displayTime}min`)
+      .setFooter(`Vous avez ${displayTime}min pour répondre`)
       .setColor("GOLD");
 
     const sentMessage = (await channel.send(embed)) as Message;
