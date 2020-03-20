@@ -44,6 +44,15 @@ const askFactionNameWithReact = async (
     if (optional) {
       const noEmoji = message.guild.emojis.find(emoji => emoji.name === "no");
       await sentMessage.react(noEmoji);
+
+      const filter = (reaction: MessageReaction, user: User) => {
+        return reaction.emoji === noEmoji && user.id === message.author.id;
+      };
+
+      sentMessage.awaitReactions(filter, { max: 1 }).then(() => {
+        sentMessage.clearReactions();
+        resolve();
+      });
     }
 
     for (const emoji of emojiList) {
