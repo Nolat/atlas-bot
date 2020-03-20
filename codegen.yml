@@ -1,5 +1,5 @@
 overwrite: true
-schema: "https://edell-api-dev.herokuapp.com/graphql"
+schema: "http://localhost:5400/graphql"
 documents: "src/graphql/**/*.ts"
 generates:
   src/generated/graphql.ts:

@@ -10,6 +10,18 @@ export default gql`
         icon
         color
       }
+      titles {
+        title {
+          name
+          level
+          branch {
+            name
+          }
+          faction {
+            name
+          }
+        }
+      }
       joinedFactionAt
       money
       experience

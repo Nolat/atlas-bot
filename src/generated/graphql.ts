@@ -43,6 +43,8 @@ export type Mutation = {
   removeTitle: Scalars["Boolean"];
   addTitleBranch: TitleBranch;
   removeTitleBranch: Scalars["Boolean"];
+  addUserTitle: UserTitle;
+  removeUserFaction: Scalars["Boolean"];
   setUserFaction: User;
   unsetUserFaction: User;
   giveUserMoney: User;
@@ -93,6 +95,16 @@ export type MutationRemoveTitleBranchArgs = {
   name: Scalars["String"];
 };
 
+export type MutationAddUserTitleArgs = {
+  name: Scalars["String"];
+  id: Scalars["String"];
+};
+
+export type MutationRemoveUserFactionArgs = {
+  name: Scalars["String"];
+  id: Scalars["String"];
+};
+
 export type MutationSetUserFactionArgs = {
   factionName: Scalars["String"];
   id: Scalars["String"];
@@ -122,6 +134,8 @@ export type Query = {
   title: Title;
   titleBranches: Array<TitleBranch>;
   titleBranch: TitleBranch;
+  userTitles: Array<UserTitle>;
+  userTitle: UserTitle;
   users: Array<User>;
   user: User;
 };
@@ -156,6 +170,16 @@ export type QueryTitleBranchArgs = {
   name: Scalars["String"];
 };
 
+export type QueryUserTitlesArgs = {
+  factionName?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["String"]>;
+};
+
+export type QueryUserTitleArgs = {
+  name: Scalars["String"];
+  id: Scalars["String"];
+};
+
 export type QueryUserArgs = {
   id: Scalars["String"];
 };
@@ -185,7 +209,7 @@ export type User = {
   __typename?: "User";
   id: Scalars["String"];
   username: Scalars["String"];
-  titles: UserTitle;
+  titles?: Maybe<Array<UserTitle>>;
   faction?: Maybe<Faction>;
   joinedFactionAt?: Maybe<Scalars["String"]>;
   money: Scalars["Float"];
@@ -430,6 +454,20 @@ export type UserInfoQuery = { __typename?: "Query" } & {
   > & {
       faction: Maybe<
         { __typename?: "Faction" } & Pick<Faction, "name" | "icon" | "color">
+      >;
+      titles: Maybe<
+        Array<
+          { __typename?: "UserTitle" } & {
+            title: { __typename?: "Title" } & Pick<Title, "name" | "level"> & {
+                branch: Maybe<
+                  { __typename?: "TitleBranch" } & Pick<TitleBranch, "name">
+                >;
+                faction: Maybe<
+                  { __typename?: "Faction" } & Pick<Faction, "name">
+                >;
+              };
+          }
+        >
       >;
     };
 };

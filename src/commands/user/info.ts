@@ -1,4 +1,4 @@
-import { Message, RichEmbed, User } from "discord.js";
+import { Message, RichEmbed, User, MessageReaction } from "discord.js";
 import moment from "moment";
 
 // * GraphQL
@@ -6,14 +6,25 @@ import client from "graphql/client";
 
 import userInfo from "graphql/user/queries/userInfo";
 
-import { UserInfoQuery, UserInfoQueryVariables } from "generated/graphql";
+import {
+  UserInfoQuery,
+  UserInfoQueryVariables,
+  Maybe,
+  Faction
+} from "generated/graphql";
 
 // * Types
 import { Command } from "types";
 
 // * Helpers
+import getMoneyString from "./helpers/getMoneyString";
 import getPercentOfNextLevel from "./helpers/getPercentOfNextLevel";
 import getXPLimitByLevel from "./helpers/getXPLimitByLevel";
+
+// * Interface
+type FactionType = Maybe<
+  { __typename?: "Faction" } & Pick<Faction, "name" | "icon" | "color">
+>;
 
 const InfoCommand: Command = {
   name: "info",
@@ -28,31 +39,100 @@ const runInfo = (message: Message) => {
   const { mentions } = message;
 
   if (mentions.members.size)
-    mentions.members.forEach(member => getInfoForMember(message, member.user));
-  else getInfoForMember(message, message.author);
+    mentions.members.forEach(member => sendInfoMessage(message, member.user));
+  else sendInfoMessage(message, message.author);
 };
 
-const getInfoForMember = async (message: Message, user: User) => {
-  const embed = new RichEmbed();
+const sendInfoMessage = async (message: Message, user: User) => {
+  const defaultInfoEmbed = await buildInfoEmbedPage(message, user, 0, true);
+
+  const infoMessage = (await message.channel.send(defaultInfoEmbed)) as Message;
+  buildPagination(infoMessage, user, message.author);
+};
+
+const buildPagination = async (
+  infoMessage: Message,
+  user: User,
+  author: User,
+  pageId = 0
+) => {
+  const emojiList: string[] = [];
+  if (pageId > 0) emojiList.push("⏪");
+  if (pageId < 1) emojiList.push("⏩");
+
+  for (const emoji of emojiList) {
+    await infoMessage.react(emoji);
+  }
+
+  const filter = (reaction: MessageReaction, checkedUser: User) => {
+    return (
+      emojiList.includes(reaction.emoji.name) && checkedUser.id === author.id
+    );
+  };
+
+  infoMessage.awaitReactions(filter, { max: 1 }).then(async collected => {
+    await infoMessage.clearReactions();
+
+    const newId =
+      collected.first().emoji.name === "⏪" ? pageId - 1 : pageId + 1;
+
+    infoMessage.edit(await buildInfoEmbedPage(infoMessage, user, newId));
+    buildPagination(infoMessage, user, author, newId);
+  });
+};
+
+const buildInfoEmbedPage = async (
+  message: Message,
+  user: User,
+  pageId: number,
+  forceFetch = false
+): Promise<RichEmbed> => {
+  const infoEmbed = new RichEmbed();
 
   const { data } = await client.query<UserInfoQuery, UserInfoQueryVariables>({
     query: userInfo,
     variables: { id: user.id },
-    fetchPolicy: "network-only"
+    fetchPolicy: forceFetch ? "network-only" : "cache-first"
   });
-  const { faction } = data.user;
-  const joinedFactionAt = moment(Number(data?.user.joinedFactionAt!))
-    .locale("fr")
-    .format("LL");
 
-  embed.setTitle(user.username);
+  if (data.user.faction) {
+    infoEmbed.setColor(data.user.faction.color);
+  } else infoEmbed.setColor("GOLD");
+
+  infoEmbed.setTitle(user.username);
+
+  switch (pageId) {
+    case 0:
+      await buildGeneralInfoPage(infoEmbed, message, data);
+      break;
+
+    case 1:
+      await buildTitleInfoPage(infoEmbed, message, data);
+      break;
+
+    default:
+      break;
+  }
+
+  return infoEmbed;
+};
+
+const buildGeneralInfoPage = async (
+  embed: RichEmbed,
+  message: Message,
+  data: UserInfoQuery
+) => {
+  const { faction } = data.user;
+
   if (faction) {
-    embed
-      .setDescription(
-        `${faction.icon} Membre de **${faction.name}** depuis le ${joinedFactionAt}`
-      )
-      .setColor(faction.color);
-  } else embed.setColor("GOLD");
+    const joinedFactionAt = moment(Number(data?.user.joinedFactionAt!))
+      .locale("fr")
+      .format("LL");
+
+    embed.setDescription(
+      `${faction.icon} Membre de **${faction.name}** depuis le ${joinedFactionAt}`
+    );
+  }
 
   embed.addField("Monnaie", getMoneyString(message, data.user.money));
 
@@ -72,55 +152,35 @@ const getInfoForMember = async (message: Message, user: User) => {
         ${xpBar}`
     );
   }
-
-  message.channel.send(embed);
 };
 
-const getMoneyString = (message: Message, money: number): string => {
-  let text = "";
+const buildTitleInfoPage = async (
+  embed: RichEmbed,
+  message: Message,
+  data: UserInfoQuery
+) => {
+  const { faction, titles } = data.user;
 
-  const pp = Math.floor(money / 1000000);
-  const po = Math.floor((money - pp * 1000000) / 10000);
-  const pa = Math.floor((money - pp * 1000000 - po * 10000) / 100);
-  const pc = Math.floor(money - pp * 1000000 - po * 10000 - pa * 100);
+  embed.setTitle(`${data.user.username} - Titres`);
 
-  const ppEmoji = message.guild.emojis.find(emoji => emoji.name === "pp");
-  const poEmoji = message.guild.emojis.find(emoji => emoji.name === "po");
-  const paEmoji = message.guild.emojis.find(emoji => emoji.name === "pa");
-  const pcEmoji = message.guild.emojis.find(emoji => emoji.name === "pc");
+  if (!faction || !titles) {
+    embed.setDescription(":warning: Il n'y a aucun tire à afficher.");
+  } else {
+    titles.forEach(userTitle => {
+      if (userTitle.title.faction) {
+        if (userTitle.title.faction.name === faction.name) {
+          const { title } = userTitle;
+          if (title.level) {
+            embed.addField(`Niveau **${title.level}**`, title.name);
+          }
 
-  if (pp > 0)
-    text =
-      pp > 1
-        ? text.concat(`${ppEmoji} **${pp}** pièces de Platine`)
-        : text.concat(`${ppEmoji} **${pp}** pièce de Platine`);
-
-  if (pp > 0 && (po > 0 || pa > 0 || pc > 0)) text = text.concat(`\n`);
-
-  if (po > 0)
-    text =
-      po > 1
-        ? text.concat(`${poEmoji} **${po}** pièces d'Or`)
-        : text.concat(`${poEmoji} **${po}** pièce d'Or`);
-
-  if (po > 0 && (pa > 0 || pc > 0)) text = text.concat(`\n`);
-
-  if (pa > 0)
-    text =
-      pa > 1
-        ? text.concat(`${paEmoji} **${pa}** pièces d'Argent`)
-        : text.concat(`${paEmoji} **${pa}** pièce d'Argent`);
-
-  if (pa > 0 && pc > 0) text = text.concat(`\n`);
-
-  if (pc > 0)
-    text =
-      pc > 1
-        ? text.concat(`${pcEmoji} **${pc}** pièces de Cuivre`)
-        : text.concat(`${pcEmoji} **${pc}** pièce de Cuivre`);
-
-  if (!pp && !po && !pa && !pc) text = "Aucune pièce";
-
-  return text;
+          if (title.branch) {
+            embed.setDescription(`Branche **${title.branch.name}**`);
+          }
+        }
+      }
+    });
+  }
 };
+
 export default InfoCommand;
