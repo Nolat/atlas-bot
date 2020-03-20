@@ -61,7 +61,7 @@ const runAddXP = async (message: Message) => {
   }
 
   try {
-    let factionName = await askFactionNameWithReact(
+    const factionName = await askFactionNameWithReact(
       message,
       QUESTION_TITLE,
       FACTION_QUESTION,
@@ -80,7 +80,8 @@ const runAddXP = async (message: Message) => {
 
     mentions.users.forEach(async user => {
       const { id } = user;
-      let factionError = false;
+      let localFactionError = false;
+      let localFactionName = factionName;
 
       if (!factionName) {
         const { data } = await client.query<
@@ -93,24 +94,24 @@ const runAddXP = async (message: Message) => {
           fetchPolicy: "network-only"
         });
 
-        if (data.user.faction) factionName = data.user.faction.name;
+        if (data.user.faction) localFactionName = data.user.faction.name;
         else {
           embed
             .setColor("RED")
             .setTitle(":rotating_light: Erreur!")
             .setDescription(`${user} n'est pas dans une faction.`);
 
-          factionError = true;
+          localFactionError = true;
         }
       }
 
-      if (!factionError) {
+      if (!localFactionError) {
         const { data, errors } = await client.mutate<
           GiveUserExperienceMutation,
           GiveUserExperienceMutationVariables
         >({
           mutation: giveUserExperience,
-          variables: { factionName, id, experience },
+          variables: { factionName: localFactionName, id, experience },
           errorPolicy: "all"
         });
 
@@ -119,7 +120,7 @@ const runAddXP = async (message: Message) => {
             .setTitle("🎉 Félicitations !")
             .setColor("GREEN")
             .setDescription(
-              `${user.toString()} a reçu ${experience} point(s) d'expérience chez ${factionName}.`
+              `${user.toString()} a reçu ${experience} point(s) d'expérience chez ${localFactionName}.`
             );
         }
 
