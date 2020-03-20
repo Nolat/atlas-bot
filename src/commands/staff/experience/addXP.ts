@@ -23,7 +23,6 @@ import { Command } from "types";
 
 // * Faction helpers
 import askFactionNameWithReact from "commands/helpers/faction/askFactionNameWithReact";
-import askFactionName from "commands/helpers/faction/askFactionName";
 
 // * Constants
 const QUESTION_TITLE = ":sparkles: Ajout d'expérience";
